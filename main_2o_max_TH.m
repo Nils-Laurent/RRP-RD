@@ -1,4 +1,4 @@
-% close all
+close all
 
 %% signal definition
 L = 4096;
@@ -19,6 +19,9 @@ cas = 1;
 
 noise = randn(L,1)+1i*randn(L,1);
 s_noise = sigmerge(s_clean, noise, -10);
+% FILE_ = load('s_noise_cas1.mat');
+% s_noise = FILE_.s_noise;
+
 [g, Lg] = create_gaussian_window(L, Nfft, sigma);
 
 %% 2nd order computation
@@ -33,7 +36,7 @@ s_noise = sigmerge(s_clean, noise, -10);
 % plot((0:L-1)/L, Cs(:)*L/Nfft, 'r');
 % hold off;
 
-exridge_new(TFR_noise, sigma, q, 2);
+exridge_new(TFR_noise, Lg, sigma, q, 2);
 
 % tt1 = 1076;
 % tt2 = 1114;
