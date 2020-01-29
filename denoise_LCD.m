@@ -1,4 +1,4 @@
-function [s_denoised_LC, TFR_denoised, Cs, Lg, E2] = denoise_LCD(s_noise, NRidges, clwin, sigma_s, Nfft, phip, phipp)
+function [s_denoised_LC, TFR_denoised, Cs, Lg, E2] = denoise_LCD(s_noise, NRidges, sigma_s, Nfft)
 
 L = length(s_noise);
 cas = 1;
@@ -10,7 +10,16 @@ cas = 1;
 TFR_noise = TFR_noise/L;
 
 %% ridge extraction
-[Cs] = exridge_mult(TFR_noise, NRidges, 0, 0, clwin);
+[Cs_1] = exridge_mult(TFR_noise, NRidges, 0, 0, 10);
+[TFR_n, omega, omega2, q] = FM_operators(s_noise, Nfft, g, Lg, sigma_s);
+[Cs] = exridge_new(TFR_n, Lg, sigma_s, q, 2);
+
+for n=1:L
+    if isnan(Cs(n))
+        Cs(n) = Cs_1(n);
+    end
+end
+Cs = Cs';
 
 % figure;
 % hold on;

@@ -1,11 +1,11 @@
-function [Cs_lin] = exridge_new(TFR, Lg, sigma, q, C)
+function [C_opt_pchip] = exridge_new(TFR, Lg, sigma, q, omega, omega2, C)
 
 [Nfft, L] = size(TFR);
-%c = zeros(L, 1);
 
 gamma = median(abs(real(TFR(:))))/0.6745;
 
 % Values from the Chi-squared table : P[X > Cp] = p
+%ratio = 1/100;
 %C1 = 9.2103;
 ratio = 1/10;
 C10 = 4.6052;
@@ -14,28 +14,23 @@ TH = gamma*sqrt(C10);
 
 %N_lin = min(60,floor(L/8));
 %init_set = floor(linspace(L/(N_lin+1), L-L/(N_lin+1), N_lin));
-%init_set = floor(linspace(L/(N_lin+1), L-L/(N_lin+1), N_lin));
 N_lin = floor(L/(2*Lg));
 step = floor(L/N_lin);
 init_set = 1:step:(L-step);
 N_lin = length(init_set);
-%R = floor(min(step, Lg/16));
 R = max(2, floor(L/(4*Nfft)));
 N_shift = floor(step/R);
 shifts = 0:R:(N_shift*R-1);
-N_shift = length(shifts)
+N_shift = length(shifts);
 
 
 Cs_shift = zeros(N_shift, L);
-Es_shift = zeros(N_shift);
-%Er = zeros(N_lin, N_shift);
 
 for n_shift = 1:N_shift
     Cs_lin = zeros(N_lin, L);
     Es_lin = zeros(N_lin, 1);
     E_matrix = zeros(N_lin, L);
     X_init = zeros(N_lin, 1);
-    Y_init = zeros(N_lin, 1);
     Ar = zeros(N_lin, 1);
     Br = zeros(N_lin, 1);
     for n_lin = 1:N_lin
@@ -46,7 +41,6 @@ for n_shift = 1:N_shift
         end
             
         X_init(n_lin) = n0;
-        %Y_init(n_lin, n_shift) = y0;
         E_matrix(n_lin, n0) = e0^2;
         e = e0^2;
         Cs_lin(n_lin, n0) = y0;
@@ -94,39 +88,8 @@ for n_shift = 1:N_shift
             RQ(n) = round(Nfft/(L^2)*real(q(Cs_lin(n_lin, n), n)));
         end
 
-        %Er(n_lin, n_shift) = e;
         Es_lin(n_lin) = e;
     end
-    
-%     [Es_lin, Er_order] = sort(Es_lin, 'descend');
-%     Cs_lin = Cs_lin(Er_order, :);
-%     X_init = X_init(Er_order);
-%     Y_init = Y_init(Er_order);
-%     Ar = Ar(Er_order);
-%     Br = Br(Er_order);
-%     
-%     %% compute C_opt(n_off)
-%     opt_map = zeros(L, 1);
-%     C_opt = zeros(L, 1);
-%     Nr_opt = 0;
-%     for n_lin=1:N_lin
-%         nd = X_init(n_lin);
-%         if opt_map(nd) > 0
-%             continue;
-%         end
-% 
-%         Nr_opt = Nr_opt + 1;
-% 
-%         for m = Ar(n_lin):Br(n_lin)
-%             if opt_map(m) == 0
-%                 opt_map(m) = n_lin;
-%                 C_opt(m) = Cs_lin(opt_map(m), m);
-%             end
-%             if C_opt(m) > 0
-%                 Es_shift(n_shift) = Es_shift(n_shift) + abs(TFR(C_opt(m), m))^2;
-%             end
-%         end
-%     end
 
     C_opt_shift = zeros(L, 1);
     
@@ -150,47 +113,7 @@ for n_shift = 1:N_shift
 %     pause
 end
 
-%% compare offset dependent ridges
-%Cs_test = zeros(N_shift, L);
-% test_std = zeros(L, 1);
-% C_opt_shift = zeros(L, 1);
-% for n=1:L
-%     A = 0;
-%     for n_shift=1:N_shift
-%         A = A + Cs_shift(n_shift, n);
-%         if isnan(A)
-%             break;
-%         end
-%     end
-% %     X = nonzeros(Cs_shift(:,n));
-% %     if isempty(X)
-% %         continue;
-% %     end
-% %     X2 = unique(X);
-% %     ns = histc(X, X2);
-% %     [~, arg] = max(ns);
-% %     y = X2(arg);
-%     cur_std = std(Cs_shift(:, n));
-%     test_std(n) = cur_std;
-%     TH_std = sqrt((Nfft^2-1)/12);
-%     if (cur_std - TH_std) > 0 || length(X) < 10
-%         y = nan;
-%     else
-%         y = median(X);
-%     end
-%     if length(X) >= 10,
-%      y = median(X);
-%     else
-%      y = nan;
-%     end 
-    %if n == 1775
-    % Cs_shift(:,n)
-    % pause
-    %end 
-    %[~, arg] = max(abs(TFR(Cs_shift(:, n), n)));
-%     C_opt_shift(n) = y;
-% end
-
+%% detect high response from Cs_shift
 C_opt = zeros(L, 1);
 max_count = zeros(L, 1);
 len_X = zeros(L, 1);
@@ -203,8 +126,8 @@ for n=1:L
     X2 = unique(X);
     [v, arg] = max(histc(X, X2));
     % freq cos : v > 15
-    %if v > floor(2*N_shift/3)
-    if v > 20
+    if v > 15
+    % if v > floor(2*N_shift/3)
         max_count(n) = v;
         y = X2(arg);
         C_opt(n) = y;
@@ -220,17 +143,8 @@ C_opt(C_opt == 0) = nan;
 % set(gca,'ydir','normal');
 % axis square
 % hold on;
-% plot(0:L-1, (Cs_shift(:, :)));
+% plot(0:L-1, C_opt, 'r');
 % hold off;
-% pause
-
-figure;
-imagesc(0:L-1, (1:Nfft), abs(TFR));
-set(gca,'ydir','normal');
-axis square
-hold on;
-plot(0:L-1, C_opt, 'r');
-hold off;
 
 %% look for ridge parts
 S = 0;
@@ -260,54 +174,154 @@ end
 X1_opt = nonzeros(X1_opt);
 X2_opt = nonzeros(X2_opt);
 
-%% ridge completion
-for m=1:M
-    n1 = X1_opt(m);
-    n2 = X2_opt(m);
-    k1 = C_opt(n1);
-    k2 = C_opt(n2);
-    ka = min(k1, k2);
-    kb = max(k1, k2);
-    if kb - ka < 2
-        for n=(n1+1):(n2-1)
-            C_opt(n) = kb;
-        end
-        continue;
-    end
-    
-    Y = abs(TFR(ka:kb, (n1+1):(n2-1)));
-    Y_max_loc = zeros(1,n2-n1-1);
-    
-%     for n=2:(n2-n1)
-%         for k=2:(kb-ka)
+%% compute pchip from C_opt
+% Xpchip = zeros(L, 1);
+% Ypchip = zeros(L, 1);
+% for n=1:L
+%     if ~isnan(C_opt(n))
+%         Xpchip(n) = n;
+%         Ypchip(n) = C_opt(n);
+%     end
+% end
+% Xpchip = nonzeros(Xpchip);
+% Ypchip = nonzeros(Ypchip);
+% C_pchip = pchip(Xpchip, Ypchip, 1:L);
+
+%% C_opt_pchip
+% C_opt_pchip = C_opt;
+% Y = abs(TFR);
+% for m=1:M
+%     n1 = X1_opt(m) +1;
+%     n2 = X2_opt(m) -1;
+%     for n=n1:n2
+%         k_pc = C_pchip(n);
+%         k_max = inf;
+%         for k=2:(Nfft-1)
 %             if Y(k-1, n) < Y(k, n) && Y(k+1, n) < Y(k, n)
-%                 Y_max_loc(k, n) = Y(k, n);
+%                 if abs(k - k_pc) < abs(k_max - k_pc)
+%                     k_max = k;
+%                 end
 %             end
 %         end
+%         C_opt_pchip(n) = k_max;
 %     end
-%     Y = nonzeros(Y_max_loc(:));
-    for n=1:n2-n1-1
-     Y_max_loc(n) = max(Y(:,n));
-    end
+% end
+% 
+% figure;
+% imagesc((0:L-1)/L, (1:Nfft), abs(TFR));
+% set(gca,'ydir','normal');
+% axis square
+% hold on;
+% plot((0:L-1)/L, C_pchip, 'k');
+% plot((0:L-1)/L, C_opt_pchip, 'r');
+% hold off;
+
+%% C_opt_lin
+C_opt_lin_w2 = C_opt;
+C_opt_lin_w = C_opt;
+C_opt_lin = C_opt;
+C_lin = C_opt;
+Y = abs(TFR);
+% R = max(2, floor(L/(4*Nfft)));
+for m=1:M
+    n1 = X1_opt(m) +1;
+    n2 = X2_opt(m) -1;
+    line_m = round(linspace(C_opt(n1-1), C_opt(n2+1), n2-n1+1));
     
-    %Y_max_loc = Y(Y
-    Y2 = unique(Y(:));
-    [~, arg] = max(histc(Y(:), Y2));
-    ridge_v = Y2(arg);
-    for n=(n1+1):(n2-1)
-        %[~, arg] = min(abs(abs(TFR(ka:kb, n)) - ridge_v));
-        [~, arg] = max(abs(TFR(ka:kb, n)));
-        C_opt(n) = ka + arg -1;
+    for n=n1:n2
+%         C_lin(n) = line_m(n-n1+1);
+%         k_pc = line_m(n-n1+1);
+%         k_max = inf;
+%         for k=2:(Nfft-1)
+%             if Y(k-1, n) < Y(k, n) && Y(k+1, n) < Y(k, n)
+%                 if abs(k - k_pc) < abs(k_max - k_pc)
+%                     k_max = k;
+%                 end
+%             end
+%         end
+%         C_opt_lin(n) = k_max;
+
+        C_lin(n) = line_m(n-n1+1);
+        k_lc = C_lin(n);
+        %delta = omega2(k_lc, n) -(k_lc-1)*(L/Nfft);
+        
+%         % use reallocation vector from delta
+%         sd = sign(delta)*1;
+%         if (sd == 0), sd = 1; end
+%         KL = sd*max(sd, sd*Nfft);
+%         k_max = KL;
+%         for k=k_lc:sd:KL
+%             if Y(k-1, n) < Y(k, n) && Y(k+1, n) < Y(k, n)
+%                 k_max = k;
+%                 break;
+%             end
+%         end
+        C_opt_lin_w2(n) = round(omega2(k_lc, n)*(Nfft/L))+1;
+        C_opt_lin_w(n) = round(omega(k_lc, n)*(Nfft/L))+1;
+        
+        kw2 = round(omega2(k_lc, n)*(Nfft/L))+1;
+        kw = round(omega(k_lc, n)*(Nfft/L))+1;
+        
+        [~, II] = min([abs(kw2 - k_lc) abs(kw - k_lc)]);
+        if II == 1
+            C_opt_lin(n) = kw2;
+        else
+            C_opt_lin(n) = kw;
+        end
     end
 end
 
 figure;
-imagesc(0:L-1, (1:Nfft), abs(TFR));
+imagesc(1:L, 1:Nfft, abs(TFR));
 set(gca,'ydir','normal');
 axis square
 hold on;
-plot(0:L-1, C_opt, 'r');
+plot(1:L, C_lin, 'k');
+plot(1:L, C_opt_lin, 'r');
+%plot(1:L, C_opt_lin_w2, 'r');
+%plot(1:L, C_opt_lin_w, 'g--');
 hold off;
+
+%% ridge completion (old)
+% for m=1:M
+%     n1 = X1_opt(m);
+%     n2 = X2_opt(m);
+%     k1 = C_opt(n1);
+%     k2 = C_opt(n2);
+%     ka = min(k1, k2);
+%     kb = max(k1, k2);
+%     if kb - ka < 2
+%         for n=(n1+1):(n2-1)
+%             C_opt(n) = kb;
+%         end
+%         continue;
+%     end
+%     
+%     Y = abs(TFR(ka:kb, (n1+1):(n2-1)));
+%     Y_max_loc = zeros(1,n2-n1-1);
+%     
+% %     for n=2:(n2-n1)
+% %         for k=2:(kb-ka)
+% %             if Y(k-1, n) < Y(k, n) && Y(k+1, n) < Y(k, n)
+% %                 Y_max_loc(k, n) = Y(k, n);
+% %             end
+% %         end
+% %     end
+% %     Y = nonzeros(Y_max_loc(:));
+%     for n=1:n2-n1-1
+%      Y_max_loc(n) = max(Y(:,n));
+%     end
+%     
+%     %Y_max_loc = Y(Y
+%     Y2 = unique(Y(:));
+%     [~, arg] = max(histc(Y(:), Y2));
+%     ridge_v = Y2(arg);
+%     for n=(n1+1):(n2-1)
+%         %[~, arg] = min(abs(abs(TFR(ka:kb, n)) - ridge_v));
+%         [~, arg] = max(abs(TFR(ka:kb, n)));
+%         C_opt(n) = ka + arg -1;
+%     end
+% end
 
 %% figures
 % figure;
