@@ -1,4 +1,4 @@
-function [C_opt_pchip] = exridge_new(TFR, Lg, sigma, q, omega, omega2, C)
+function [C_opt] = exridge_new(TFR, Lg, sigma, q, omega, omega2, C)
 
 [Nfft, L] = size(TFR);
 
@@ -126,8 +126,9 @@ for n=1:L
     X2 = unique(X);
     [v, arg] = max(histc(X, X2));
     % freq cos : v > 15
-    if v > 15
-    % if v > floor(2*N_shift/3)
+    % if v > 15
+    % if v > 20
+    if v > floor(2*N_shift/3)
         max_count(n) = v;
         y = X2(arg);
         C_opt(n) = y;
@@ -217,111 +218,173 @@ X2_opt = nonzeros(X2_opt);
 % hold off;
 
 %% C_opt_lin
-C_opt_lin_w2 = C_opt;
-C_opt_lin_w = C_opt;
-C_opt_lin = C_opt;
+% C_opt_lin_w2 = C_opt;
+% C_opt_lin_w = C_opt;
+%C_opt_lin = C_opt;
+C1it_lin = C_opt;
+C2it_lin = C_opt;
+C_lin_FM = C_opt;
+C_lin_w = C_opt;
+C_lin_w2 = C_opt;
 C_lin = C_opt;
+C_lin_init = C_opt;
 Y = abs(TFR);
-% R = max(2, floor(L/(4*Nfft)));
+R = max(2, floor(L/(4*Nfft)));
 for m=1:M
     n1 = X1_opt(m) +1;
     n2 = X2_opt(m) -1;
-    line_m = round(linspace(C_opt(n1-1), C_opt(n2+1), n2-n1+1));
     
-    for n=n1:n2
-%         C_lin(n) = line_m(n-n1+1);
-%         k_pc = line_m(n-n1+1);
-%         k_max = inf;
-%         for k=2:(Nfft-1)
-%             if Y(k-1, n) < Y(k, n) && Y(k+1, n) < Y(k, n)
-%                 if abs(k - k_pc) < abs(k_max - k_pc)
-%                     k_max = k;
-%                 end
-%             end
-%         end
-%         C_opt_lin(n) = k_max;
-
-        C_lin(n) = line_m(n-n1+1);
-        k_lc = C_lin(n);
-        %delta = omega2(k_lc, n) -(k_lc-1)*(L/Nfft);
-        
-%         % use reallocation vector from delta
-%         sd = sign(delta)*1;
-%         if (sd == 0), sd = 1; end
-%         KL = sd*max(sd, sd*Nfft);
-%         k_max = KL;
-%         for k=k_lc:sd:KL
-%             if Y(k-1, n) < Y(k, n) && Y(k+1, n) < Y(k, n)
-%                 k_max = k;
-%                 break;
-%             end
-%         end
-        C_opt_lin_w2(n) = round(omega2(k_lc, n)*(Nfft/L))+1;
-        C_opt_lin_w(n) = round(omega(k_lc, n)*(Nfft/L))+1;
-        
-        kw2 = round(omega2(k_lc, n)*(Nfft/L))+1;
-        kw = round(omega(k_lc, n)*(Nfft/L))+1;
-        
-        [~, II] = min([abs(kw2 - k_lc) abs(kw - k_lc)]);
-        if II == 1
-            C_opt_lin(n) = kw2;
-        else
-            C_opt_lin(n) = kw;
+    %% high response extremities fitting
+    nf1 = n1;
+    nf2 = n2;
+    line_E = 0;
+    line_mi = round(linspace(C_opt(n1-1), C_opt(n2+1), n2-n1+1));
+    line_m = line_mi;
+    %if ~isnan(C_opt(n1-Lg-1)) && ~isnan(C_opt(n2+Lg+1))
+    for n1t=n1-Lg:n1
+        if isnan(C_opt(n1t-1))
+            continue;
+        end
+        for n2t=n2:n2+Lg
+            if isnan(C_opt(n2t+1))
+                continue;
+            end
+            line_t = round(linspace(C_opt(n1t-1), C_opt(n2t+1), n2t-n1t+1));
+            line_tE = 0;
+            for nt=n1:n2
+                line_tE = line_tE + Y(line_t(nt -n1t +1), nt)^2;
+            end
+            if line_tE > line_E
+                nf1 = n1t;
+                nf2 = n2t;
+                line_E = line_tE;
+                line_m = line_t;
+            end
         end
     end
+
+%     figure;
+%     imagesc(1:L, 1:Nfft, abs(TFR));
+%     set(gca,'ydir','normal');
+%     axis square
+%     hold on;
+%     plot([ni1-1, ni2+1], [C_opt(ni1-1), C_opt(ni2+1)], 'r');
+%     plot([n1-1, n2+1], [C_opt(n1-1), C_opt(n2+1)], 'g--');
+%     hold off;
+%     legend;
+%     pause
+
+%     fprintf("m = %f -------------------\n", m);
+%     fprintf("n1 = %f -------------------\n", n1);
+%     fprintf("diff_n1 = %f\n", n1-nf1);
+%     fprintf("diff_n2 = %f\n", nf2-n2);
+
+    line_m = line_m(n1-nf1+1:n2-nf1+1);
+    C_lin(n1:n2) = line_m;
+    C_lin_init(n1:n2) = line_mi;
+    
+    %% direct method
+    
+    C_lin_FM(n1:n2) = line_m;
+    C_lin_w(n1:n2) = line_m;
+    C_lin_w2(n1:n2) = line_m;
+    for n=n1:n2
+        k_line = line_m(n-n1+1);
+
+        kw2 = round(omega2(k_line, n)*(Nfft/L))+1;
+        kw = round(omega(k_line, n)*(Nfft/L))+1;
+
+        [~, II] = min([abs(kw2 - k_line) abs(kw - k_line)]);
+        if II == 1
+            Cn = kw2;
+        else
+            Cn = kw;
+        end
+        C_lin_FM(n) = Cn;
+        C_lin_w(n) = kw;
+        C_lin_w2(n) = kw2;
+    end
+
+%     %% iteration init.
+%     C1it_lin(n1:n2) = line_m;
+%     C2it_lin(n1:n2) = line_m;
+%     
+%     %% iteration : fixed starting point
+%     for p = n2:-R:n1
+%         line_mp = round(linspace(C1it_lin(n1-1), C1it_lin(p+1), p-n1+1));
+%         for n=n1:p
+%             k_line = line_mp(n-n1+1);
+% 
+%             kw2 = round(omega2(k_line, n)*(Nfft/L))+1;
+%             kw = round(omega(k_line, n)*(Nfft/L))+1;
+% 
+%             [~, II] = min([abs(kw2 - k_line) abs(kw - k_line)]);
+%             if II == 1
+%                 Cn = kw2;
+%             else
+%                 Cn = kw;
+%             end
+%             
+%             if isnan(C1it_lin(n)) || Y(Cn) > Y(C1it_lin(n))
+%                 C1it_lin(n) = Cn;
+%             end
+%         end
+%     end
+% 
+%     %% iteration : fixed ending point
+%     for p = n1:R:n2
+%         line_mp = round(linspace(C2it_lin(p-1), C2it_lin(n2+1), n2-p+1));
+%         for n=p:n2
+%             k_line = line_mp(n-p+1);
+% 
+%             kw2 = round(omega2(k_line, n)*(Nfft/L))+1;
+%             kw = round(omega(k_line, n)*(Nfft/L))+1;
+% 
+%             [~, II] = min([abs(kw2 - k_line) abs(kw - k_line)]);
+%             if II == 1
+%                 Cn = kw2;
+%             else
+%                 Cn = kw;
+%             end
+%             
+%             if isnan(C2it_lin(n)) || Y(Cn) > Y(C2it_lin(n))
+%                 C2it_lin(n) = Cn;
+%             end
+%         end
+%     end
 end
 
 figure;
 imagesc(1:L, 1:Nfft, abs(TFR));
 set(gca,'ydir','normal');
 axis square
+title("initialization");
 hold on;
-plot(1:L, C_lin, 'k');
-plot(1:L, C_opt_lin, 'r');
-%plot(1:L, C_opt_lin_w2, 'r');
-%plot(1:L, C_opt_lin_w, 'g--');
+plot(1:L, C_lin, 'r');
 hold off;
 
-%% ridge completion (old)
-% for m=1:M
-%     n1 = X1_opt(m);
-%     n2 = X2_opt(m);
-%     k1 = C_opt(n1);
-%     k2 = C_opt(n2);
-%     ka = min(k1, k2);
-%     kb = max(k1, k2);
-%     if kb - ka < 2
-%         for n=(n1+1):(n2-1)
-%             C_opt(n) = kb;
-%         end
-%         continue;
-%     end
-%     
-%     Y = abs(TFR(ka:kb, (n1+1):(n2-1)));
-%     Y_max_loc = zeros(1,n2-n1-1);
-%     
-% %     for n=2:(n2-n1)
-% %         for k=2:(kb-ka)
-% %             if Y(k-1, n) < Y(k, n) && Y(k+1, n) < Y(k, n)
-% %                 Y_max_loc(k, n) = Y(k, n);
-% %             end
-% %         end
-% %     end
-% %     Y = nonzeros(Y_max_loc(:));
-%     for n=1:n2-n1-1
-%      Y_max_loc(n) = max(Y(:,n));
-%     end
-%     
-%     %Y_max_loc = Y(Y
-%     Y2 = unique(Y(:));
-%     [~, arg] = max(histc(Y(:), Y2));
-%     ridge_v = Y2(arg);
-%     for n=(n1+1):(n2-1)
-%         %[~, arg] = min(abs(abs(TFR(ka:kb, n)) - ridge_v));
-%         [~, arg] = max(abs(TFR(ka:kb, n)));
-%         C_opt(n) = ka + arg -1;
-%     end
-% end
+figure;
+imagesc(1:L, 1:Nfft, abs(TFR));
+set(gca,'ydir','normal');
+axis square
+title("positionnement direct (min)");
+hold on;
+plot(1:L, C_lin, 'k');
+plot(1:L, C_lin_FM, 'r--');
+hold off;
+
+% figure;
+% imagesc(1:L, 1:Nfft, abs(TFR));
+% set(gca,'ydir','normal');
+% axis square
+% title("positionnement iteratif");
+% hold on;
+% plot(1:L, C_lin, 'k');
+% plot(1:L, C1it_lin, 'r--');
+% plot(1:L, C2it_lin, 'g--');
+% hold off;
+
+C_opt = C_lin_FM;
 
 %% figures
 % figure;
