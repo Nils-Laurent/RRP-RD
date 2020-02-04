@@ -12,20 +12,82 @@ C10 = 4.6052;
 
 TH = gamma*sqrt(C10);
 
-% pourquoi 2*Lg
-N_lin = floor(L/(2*Lg));
-step = floor(L/N_lin);
-% step = floor(sqrt((2*Lg + 1)/(2*pi)));
-% step = floor(sqrt(2*Lg + 1));
-% step = floor((2*Lg+1)/2);
-init_set = 1:step:(L-step);
-N_lin = length(init_set);
-%
-R = max(2, floor(L/(4*Nfft)));
-N_shift = floor(step/R);
-shifts = 0:R:(N_shift*R-1);
-N_shift = length(shifts);
+SZs = [floor(Lg/2), Lg, Lg+floor(Lg/2), 2*Lg+1, 3*Lg, 4*Lg];
+N_SZ = length(SZs);
+Wmat = zeros(N_SZ, L);
+Cmat = zeros(N_SZ, L);
 
+N_shift = 8;
+shift_sz = max(2, floor((2*Lg+1)/N_shift));
+Shifts = (0:shift_sz:8*shift_sz) - 4*shift_sz;
+
+for step_sz=SZs
+    Steps = 1:step_sz:L;
+
+    for step=Steps
+        for shift=Shifts
+            n0 = max(1, step+shift);
+            n0 = min(n0, L);
+            [e0, y0] = max(abs(TFR(:, n0)).*(abs(TFR(:, n0))>3*gamma));
+            if e0 == 0
+                continue;
+            end
+
+            X_init(n_lin) = n0;
+            E_matrix(n_lin, n0) = e0^2;
+            e = e0^2;
+            Cs_lin(n_lin, n0) = y0;
+            Ar(n_lin) = n0;
+            Br(n_lin) = n0;
+
+            RQ = zeros(L, 1);
+            RQ(n0) = round(Nfft/(L^2)*real(q(Cs_lin(n_lin, n0), n0)));
+
+            %% forward iterations
+            for n=(n0+1):L
+                next_index = min(Nfft, Cs_lin(n_lin, n-1) +RQ(n-1));
+                next_index = max(1, next_index);
+                Im = max(1, next_index -C):min(Nfft, next_index +C);
+
+                Im_ratio = sum(abs(TFR(Im, n)) > TH)/length(Im);
+                if Im_ratio <= ratio
+                    break;
+                end
+
+                [v_arg, arg] = max(abs(TFR(Im, n)));
+                E_matrix(n_lin, n) = v_arg^2;
+                e = e + v_arg^2;
+                Br(n_lin) = n;
+                Cs_lin(n_lin, n) = arg + Im(1)-1;
+                RQ(n) = round(Nfft/(L^2)*real(q(Cs_lin(n_lin, n), n)));
+            end
+
+            %% backward iterations
+            for n=(n0-1):-1:1
+                next_index = min(Nfft, Cs_lin(n_lin, n+1) -RQ(n+1));
+                next_index = max(1, next_index);
+                Im = max(1, next_index -C):min(Nfft, next_index +C);
+
+                Im_ratio = sum(abs(TFR(Im, n)) > TH)/length(Im);
+                if Im_ratio <= ratio
+                    break;
+                end
+
+                [v_arg, arg] = max(abs(TFR(Im, n)));
+                E_matrix(n_lin, n) = v_arg^2;
+                e = e + v_arg^2;
+                Ar(n_lin) = n;
+                Cs_lin(n_lin, n) = arg + Im(1)-1;
+                RQ(n) = round(Nfft/(L^2)*real(q(Cs_lin(n_lin, n), n)));
+            end
+
+            Es_lin(n_lin) = e;
+        end
+    end
+    
+    Wmat(step_sz, :);
+    Cmat(step_sz, :);
+end
 
 Cs_shift = zeros(N_shift, L);
 

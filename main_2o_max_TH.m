@@ -17,15 +17,45 @@ sigma = 1/sqrt(B);
 Nfft = 512;
 cas = 1;
 
-% noise = randn(L,1)+1i*randn(L,1);
-% s_noise = sigmerge(s_clean, noise, -10);
-FILE_ = load('s_noise_cas1.mat');
-s_noise = FILE_.s_noise;
+noise = randn(L,1)+1i*randn(L,1);
+s_noise = sigmerge(s_clean, noise, -10);
+% FILE_ = load('s_noise_cas1.mat');
+% s_noise = FILE_.s_noise;
 
 [g, Lg] = create_gaussian_window(L, Nfft, sigma);
 
+
+[TFR_s_noise] = tfrstft(s_noise, Nfft, cas, g, Lg);
+
+% [TFR_noise] = tfrstft(s_noise - s_clean, Nfft, cas, g, Lg);
+% 
+% [TFR_s] = tfrstft(s_clean, Nfft, cas, g, Lg);
+% 
+% diff = abs(TFR_noise) + abs(TFR_s) - abs(TFR_s_noise);
+% 
+% fus = diff + TFR_noise;
+
+figure;
+imagesc(1:L, 1:L, abs(TFR_noise));
+set(gca,'ydir','normal');
+axis square
+hold on;
+%zn_vt = floor(sqrt((2*Lg+1)/(2*pi)));
+zn_vt = floor(2/3*Lg);
+%zn_vf = zn_vt*Nfft/L;
+D = 2*Lg+1;
+for i=zn_vt:zn_vt:L
+    plot([i, i], [1, L], 'r--');
+end
+for i=zn_vt:zn_vt:L
+    plot([1, L], [i, i], 'k--');
+end
+hold off;
+
+pause
+
 %% 2nd order computation
-[TFR_noise, omega, omega2, q] = FM_operators(s_noise, Nfft, g, Lg, sigma);
+[TFR_s_noise, omega, omega2, q] = FM_operators(s_noise, Nfft, g, Lg, sigma);
 
 % [Cs] = exridge(TFR_noise, 0, 0, 10);
 % figure;
@@ -36,7 +66,7 @@ s_noise = FILE_.s_noise;
 % plot((0:L-1)/L, Cs(:)*L/Nfft, 'r');
 % hold off;
 
-exridge_new(TFR_noise, Lg, sigma, q, omega, omega2, 2);
+exridge_new(TFR_s_noise, Lg, sigma, q, omega, omega2, 2);
 
 % tt1 = 1076;
 % tt2 = 1114;

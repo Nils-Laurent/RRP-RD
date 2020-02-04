@@ -10,9 +10,9 @@ cas = 1;
 TFR_noise = TFR_noise/L;
 
 %% ridge extraction
-[Cs_1] = exridge_mult(TFR_noise, NRidges, 0, 0, 10);
+[Cs_1] = exridge_mult(TFR_noise, NRidges, 0, 0, 2);
 [TFR_n, omega, omega2, q] = FM_operators(s_noise, Nfft, g, Lg, sigma_s);
-[Cs] = exridge_new(TFR_n, Lg, sigma_s, q, 2);
+[Cs] = exridge_new(TFR_n, Lg, sigma_s, q, omega, omega2, 2);
 
 for n=1:L
     if isnan(Cs(n))
@@ -20,16 +20,7 @@ for n=1:L
     end
 end
 Cs = Cs';
-
-% figure;
-% hold on;
-% imagesc((0:L-1)/L, (L/Nfft)*(1:Nfft), abs(TFR_noise));
-% set(gca,'ydir','normal');
-% axis square
-% colorbar;
-% plot((0:L-1)/L, (L/Nfft)*Cs,'r','linewidth',1);
-% hold off;
-% pause;
+% Cs = exridge(TFR_noise, 0, 0, 2);
 
 TFR_denoised = zeros(size(TFR_noise));
 E2 = zeros(NRidges, 2, L);
