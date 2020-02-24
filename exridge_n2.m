@@ -1,106 +1,81 @@
-function [C_opt, energies] = exridge_n2(TFR, q, C, R_set)
+function [C_opt, curves_mult_S, energies_mult_S] = exridge_n2(TFR, q, C)
 
-[Nfft, L] = size(TFR);
+[~, L] = size(TFR);
 
 gamma = median(abs(real(TFR(:))))/0.6745;
 
-% Values from the Chi-squared table : P[X > Cp] = p
-%ratio = 1/100;
-%C1 = 9.2103;
-ratio = 1/10;
-C10 = 4.6052;
+Scale_set = 16:16:256;
+N_Scale_Analysis = 8;
 
-TH = gamma*sqrt(C10);
+NS = length(Scale_set);
+curves_1S = zeros(NS, L);
+curves_mult_S = zeros(NS-N_Scale_Analysis, L);
+energies_mult_S = zeros(NS-N_Scale_Analysis, 1);
+E_maxS = 0;
 
-E_max = 0;
-%R_set = 8:8:512;
-NR = length(R_set);
-energies = zeros(NR, 1);
-curves = zeros(NR, L);
-ind_R = 0;
-
-for shift_size=R_set
-    ind_R = ind_R + 1;
-    if mod(ind_R, 16) == 0
-        fprintf("ind_R = %d/%d\n", ind_R, NR);
-    end
-    Shifts = 1:shift_size:L;
-    N_shift = length(Shifts);
-
+iScale = 0;
+for scale=Scale_set
+    iScale = iScale + 1;
+    fprintf("iScale = %d/%d\n", iScale, NS);
+    
+    E_max_scale = 0;
+    Shift_set=1:scale;
+    Base_set = 1:scale:(L-scale);
+    M_init_n = zeros(length(Shift_set), length(Base_set));
+    M_init_k = zeros(length(Shift_set), length(Base_set));
+    
+    %% scale specific weight computation
+    iShift = 0;
+        
     Weights = zeros(size(TFR));
-    Step_mat = zeros(N_shift, L);
+    for shift=Shift_set
+        iShift = iShift + 1;
+        
+        sWeights = zeros(size(TFR));
 
-    for n0=Shifts
-        [e0, y0] = max(abs(TFR(:, n0)).*(abs(TFR(:, n0))>3*gamma));
-        if e0 == 0
-            continue;
+        iN0 = 0;
+        for n0=(Base_set + shift)
+            iN0 = iN0 + 1;
+            [sWeights, k0] = partial_RD(TFR, n0, q, C, gamma, sWeights);
+            sWeights = sWeights/scale;
+            M_init_n(iShift, iN0) = n0;
+            M_init_k(iShift, iN0) = k0;
         end
-
-        Weights(y0, n0) = Weights(y0, n0) + 1;
-        Step_mat(y0, n0) = n0;
-        rq_n0 = round(Nfft/(L^2)*real(q(y0, n0)));
-
-        %% forward iterations
-        rq = rq_n0;
-        arg = y0;
-        for n=(n0+1):L
-            next_index = min(Nfft, arg +rq);
-            next_index = max(1, next_index);
-            Im = max(1, next_index -C):min(Nfft, next_index +C);
-
-            Im_ratio = sum(abs(TFR(Im, n)) > TH)/length(Im);
-            if Im_ratio <= ratio
-                break;
-            end
-
-            [~, arg] = max(abs(TFR(Im, n)));
-            arg = arg + Im(1)-1;
-            Weights(arg, n) = Weights(arg, n) + 1;
-            Step_mat(arg, n) = n0;
-            rq = round(Nfft/(L^2)*real(q(arg, n)));
-        end
-
-        %% backward iterations
-        rq = rq_n0;
-        arg = y0;
-        for n=(n0-1):-1:1
-            next_index = min(Nfft, arg -rq);
-            next_index = max(1, next_index);
-            Im = max(1, next_index -C):min(Nfft, next_index +C);
-
-            Im_ratio = sum(abs(TFR(Im, n)) > TH)/length(Im);
-            if Im_ratio <= ratio
-                break;
-            end
-
-            [~, arg] = max(abs(TFR(Im, n)));
-            arg = arg + Im(1)-1;
-            Weights(arg, n) = Weights(arg, n) + 1;
-            Step_mat(arg, n) = n0;
-            rq = round(Nfft/(L^2)*real(q(arg, n)));
-        end
+        Weights = max(Weights, sWeights);
     end
 
-    C_test = zeros(L, 1);
-    E_test = 0;
+    C_opt_scale = zeros(L, 1);
     for n=1:L
-        [v, k] = max(Weights(:, n));
+        [v, k] = max(sWeights(:, n));
         if v == 0
             continue;
         end
-        C_test(n) = k;
-        curves(ind_R, n) = k;
-        E_test = E_test + abs(TFR(k, n))^2;
-        
+
+        C_opt_scale(n) = k;
+        E_max_scale = E_max_scale + abs(TFR(k, n))^2;
     end
-    energies(ind_R) = E_test;
-    if E_test > E_max
-        E_max = E_test;
-        C_opt = C_test;
+    curves_1S(iScale, :) = C_opt_scale;
+    
+    %% multi scale analysis
+    if iScale > N_Scale_Analysis
+        
+        for p=N_Scale_Analysis:-1:1
+            C_scales = curves_1S(iScale - p, :).*(curves_1S(iScale - p, :) == curves_1S(iScale - p+1, :));
+        end
+
+        Energy_S = 0;
+        for n=1:L
+            if C_scales(n) > 0
+                Energy_S = Energy_S + abs(TFR(C_scales(n), n))^2;
+            end
+        end
+        if Energy_S > E_maxS
+            E_maxS = Energy_S;
+            C_opt = C_scales;
+        end
+        energies_mult_S(iScale - N_Scale_Analysis) = Energy_S;
+        curves_mult_S(iScale - N_Scale_Analysis, :) = C_scales;
     end
 end
-
-% figure;
-% plot(energies);
 
 end
