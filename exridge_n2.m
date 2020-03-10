@@ -1,11 +1,12 @@
-function [C_opt, curves_mult_S, energies_mult_S] = exridge_n2(TFR, q, C)
+function [C_opt] = exridge_n2(TFR, q, sigma_s, gamma_TFR)
 
 [~, L] = size(TFR);
+if (nargin < 4)
+    gamma_TFR = median(abs(real(TFR(:))))/0.6745;
+end
 
-gamma = median(abs(real(TFR(:))))/0.6745;
-
-Scale_set = 16:16:256;
-N_Scale_Analysis = 8;
+Scale_set = 16:16:128;
+N_Scale_Analysis = 3;
 
 NS = length(Scale_set);
 curves_1S = zeros(NS, L);
@@ -19,8 +20,8 @@ for scale=Scale_set
     fprintf("iScale = %d/%d\n", iScale, NS);
     
     E_max_scale = 0;
-    Shift_set=1:scale;
-    Base_set = 1:scale:(L-scale);
+    Shift_set=(1 - floor(scale/2)):2:floor(scale/2);
+    Base_set = floor(scale/2):scale:(L-(scale/2));
     M_init_n = zeros(length(Shift_set), length(Base_set));
     M_init_k = zeros(length(Shift_set), length(Base_set));
     
@@ -36,7 +37,7 @@ for scale=Scale_set
         iN0 = 0;
         for n0=(Base_set + shift)
             iN0 = iN0 + 1;
-            [sWeights, k0] = partial_RD(TFR, n0, q, C, gamma, sWeights);
+            [sWeights, k0] = partial_RD(TFR, n0, q, sigma_s, gamma_TFR, sWeights);
             sWeights = sWeights/scale;
             M_init_n(iShift, iN0) = n0;
             M_init_k(iShift, iN0) = k0;
@@ -55,6 +56,7 @@ for scale=Scale_set
         E_max_scale = E_max_scale + abs(TFR(k, n))^2;
     end
     curves_1S(iScale, :) = C_opt_scale;
+    C_opt = C_opt_scale;
     
     %% multi scale analysis
     if iScale > N_Scale_Analysis
