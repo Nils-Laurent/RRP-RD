@@ -1,4 +1,4 @@
-function [c,e] = exridge(Tx,lambda,beta,jump)
+function [c,e] = VFB_MB_exridge(Tx,lambda,beta,jump,C)
 % exridge : extracts  the ridge curve by maximising some energy. 
 %   The result is an approximation computd by a greedy algorithm.
 %   The algorithm uses several random initializations and then
@@ -18,8 +18,6 @@ Et     = abs(Tx).^2;
 [na,N] = size(Tx);
 
 % Parameters of the algorithm.
-% da = floor(jump*(na/N)); 
-% ng = 60; % Number of random initializations.
 da = jump; 
 ng = min(60,floor(N/8)); % Number of random initializations.
 
@@ -31,38 +29,45 @@ e = -Inf;
 for k = floor(linspace(N/(ng+1),N-N/(ng+1),ng))
     [ecur,idx] = max(Et(:,k));        
     ccur(k) = idx;
-    Iq = max(1,idx-da):min(na,idx+da);
-    [ecur,idx] = max(Et(Iq,k-1));        
-    ccur(k-1) = idx;
+%     Iq = max(1,idx-da(idx,k)):min(na,idx+da(idx,k));
+%     [ecur,idx] = max(Et(Iq,k-1));        
+%     ccur(k-1) = idx;
    
-    idx = ccur(k);
+%     idx = ccur(k);
     % forward step
     for b=k+1:N
-     etmp = -Inf;
-     for a=max(1,idx-da):min(na,idx+da)
-      if Et(a,b)-lambda*(N/(2*na))^2*(a-ccur(b-1))^2-beta*(N/(2*na))^2*(a-2*ccur(b-1)+ccur(b-2))^2 > etmp
-       etmp = Et(a,b)-lambda*(N/(2*na))^2*(a-ccur(b-1))^2-beta*(N/(2*na))^2*(a-2*ccur(b-1)+ccur(b-2))^2;
-       idx = a;
-      end
-     end
-     ccur(b)=idx;
+     I = intersect(ccur(b-1)+da(ccur(b-1),b-1)-C:ccur(b-1)+da(ccur(b-1),b-1)+C,1:na);
+     if isempty(I)
+         if ccur(b-1)+da(ccur(b-1),b-1)>na
+             I = na;
+%              disp('hola')
+         else
+             I = 1;
+%              disp('chau')
+         end;
+     end;
+     [etmp,idx] = max(Et(I,b));
+     ccur(b)=idx+I(1)-1;
      ecur = ecur + etmp;
     end
 
     % backward step
     idx = ccur(k);
     for b=k-1:-1:1
-        etmp = -Inf;
-        for a=max(1,idx-da):min(na,idx+da)
-            if Et(a,b)-lambda*(N/(2*na))^2*(a-ccur(b+1))^2-beta*(N/(2*na))^2*(a-2*ccur(b+1)+ccur(b+2))^2 > etmp
-                etmp = Et(a,b)-lambda*(N/(2*na))^2*(a-ccur(b+1))^2-beta*(N/(2*na))^2*(a-2*ccur(b+1)+ccur(b+2))^2;
-                idx = a;
-            end
-        end
-        ccur(b)=idx;
+        I = intersect(ccur(b+1)-da(ccur(b+1),b+1)-C:ccur(b+1)-da(ccur(b+1),b+1)+C,1:na);
+         if isempty(I)
+         if ccur(b+1)-da(ccur(b+1),b+1)>na
+             I = na;
+%              disp('hola')
+         else
+             I = 1;
+%              disp('chau')
+         end;
+        end;
+        [etmp,idx] = max(Et(I,b));
+        ccur(b)=idx+I(1)-1;
         ecur = ecur + etmp;
     end
-    
     if ecur> e
         e = ecur;
         c = ccur;
