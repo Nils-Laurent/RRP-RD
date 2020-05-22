@@ -128,7 +128,7 @@ for ir=1:Ni
     end
 end
 
-fprintf('crossing = %u\n', crossing);
+% fprintf('crossing = %u\n', crossing);
 
 end
 

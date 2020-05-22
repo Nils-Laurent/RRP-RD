@@ -1,4 +1,4 @@
-function [ridge, km] = novel_partial_RD(S_LM, m, km, QM, Nr, sigma_s)
+function [ridge, km] = novel_partial_RD(S_LM, S_LM_sorted, m, km, QM, Nr, sigma_s)
 
 [Nfft, L] = size(S_LM);
 ridge = zeros(L, 1);
@@ -48,7 +48,8 @@ rq_n0 = real(QM(km, m));
             end
             
             A = 2*Nr + 1;
-            [~, k_vec] = sort(S_LM(:, n), 'descend');
+            %[~, k_vec] = sort(S_LM(:, n), 'descend');
+            k_vec = S_LM_sorted(:, n);
             k_ = 0;
             for p=1:A
                 if k_vec(p) == k_next

@@ -36,7 +36,10 @@ for k = floor(linspace(N/(ng+1),N-N/(ng+1),ng))
 %     idx = ccur(k);
     % forward step
     for b=k+1:N
-     I = intersect(ccur(b-1)+da(ccur(b-1),b-1)-C:ccur(b-1)+da(ccur(b-1),b-1)+C,1:na);
+     %I = intersect(ccur(b-1)+da(ccur(b-1),b-1)-C:ccur(b-1)+da(ccur(b-1),b-1)+C,1:na);
+     Ia = ccur(b-1)+da(ccur(b-1),b-1)-C;
+     Ib = ccur(b-1)+da(ccur(b-1),b-1)+C;
+     I = max(1, Ia):min(na, Ib);
      if isempty(I)
          if ccur(b-1)+da(ccur(b-1),b-1)>na
              I = na;
@@ -54,7 +57,10 @@ for k = floor(linspace(N/(ng+1),N-N/(ng+1),ng))
     % backward step
     idx = ccur(k);
     for b=k-1:-1:1
-        I = intersect(ccur(b+1)-da(ccur(b+1),b+1)-C:ccur(b+1)-da(ccur(b+1),b+1)+C,1:na);
+        %I = intersect(ccur(b+1)-da(ccur(b+1),b+1)-C:ccur(b+1)-da(ccur(b+1),b+1)+C,1:na);
+         Ia = ccur(b+1)-da(ccur(b+1),b+1)-C;
+         Ib = ccur(b+1)-da(ccur(b+1),b+1)+C;
+         I = max(1, Ia):min(na, Ib);
          if isempty(I)
          if ccur(b+1)-da(ccur(b+1),b+1)>na
              I = na;

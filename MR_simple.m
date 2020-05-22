@@ -29,7 +29,7 @@ end
 
 for p=1:Nr
     for n=1:L
-        modes(p, n) = 1/g(Lg+1)*sum(TFR(KYd(n):KYu(n), n))/Nfft;
+        modes(p, n) = L/g(Lg+1)*sum(TFR(KYd(p, n):KYu(p, n), n))/Nfft;
     end
 end
 

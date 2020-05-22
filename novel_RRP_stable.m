@@ -1,16 +1,16 @@
-function [RRP_stable, RRP_E_stable] = novel_RRP_stable(TFR, S_LM, QM, sigma_s, Nr, scale)
-fprintf('compute ridge portions\n');
+function [RRP_stable, RRP_E_stable] = novel_RRP_stable(TFR, S_LM, S_LM_sorted, QM, sigma_s, Nr, scale)
+% fprintf('compute ridge portions\n');
 scale = 2*ceil(scale/2);
 
 [Nfft, L] = size(S_LM);
 
 Sr = zeros([Nr, L, L]);
 
-fprintf('scale = %u :', scale);
+% fprintf('scale = %u :', scale);
 for m=1:L
-    if mod(m, 512) == 0
-        fprintf(' %d', m);
-    end
+%     if mod(m, 512) == 0
+%         fprintf(' %d', m);
+%     end
     
     [~, k_vec] = sort(S_LM(:, m), 'descend');
     k_vec_Nr = k_vec(1:Nr);
@@ -21,10 +21,10 @@ for m=1:L
             break;
         end
         
-        [Sr(p, m, :), ~] = novel_partial_RD(S_LM, m, kp, QM, Nr, sigma_s);
+        [Sr(p, m, :), ~] = novel_partial_RD(S_LM, S_LM_sorted, m, kp, QM, Nr, sigma_s);
     end
 end
-fprintf('\n');
+% fprintf('\n');
 
 % DISP = zeros(L, L);
 % DISP(:, :) = Sr(1, :, :);

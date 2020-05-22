@@ -7,9 +7,12 @@ Ns = length(RRP_E_stable);
 r_rel_vec = zeros(1, Ns);
 Nm = 0;
 
-function [TFR_r] = RRP_supp(Nfft, L, k0_vec, LNh, range_I)
-    TFR_r = zeros(Nfft, L);
+function [TFR_r, min_n, max_n, min_k, max_k] = RRP_supp(Nfft, L, k0_vec, LNh, range_I)
     nf = 1;
+    
+    TFR_r = [];
+    min_k = Nfft;
+    max_k = 1;
     
     while k0_vec(nf) == 0
         if nf == L
@@ -17,33 +20,53 @@ function [TFR_r] = RRP_supp(Nfft, L, k0_vec, LNh, range_I)
         end
         nf = nf + 1;
     end
+    min_n = max(1, nf - LNh);
     
     if nf - 1 > 0
         nA = max(1, nf - LNh);
         nB = max(1, nf - 1);
         kA = max(1, k0_vec(nf) - range_I);
         kB = min(Nfft, k0_vec(nf) + range_I);
-        TFR_r(kA:kB, nA:nB) = 1;
+        A = zeros(Nfft,nB-nA+1); 
+        A(kA:kB,:) = 1;
+        TFR_r = A; 
     end
     
     while k0_vec(nf) > 0
         kA = max(1, k0_vec(nf) - range_I);
         kB = min(Nfft, k0_vec(nf) + range_I);
-        TFR_r(kA:kB, nf) = 1;
+        
+        min_k = min(min_k, kA);
+        max_k = max(max_k, kB);
+        
+        A = zeros(Nfft,1); 
+        A(kA:kB) = 1;
+        
+        if isempty(TFR_r)
+            TFR_r = A;
+        else
+            TFR_r = [TFR_r A];
+        end
         
         if nf == L
+            max_n = L;
+            TFR_r = TFR_r(min_k:max_k,:);
             return;
         end
         nf = nf + 1;
     end
+    max_n = min(L, nf - 1 + LNh);
     
     if nf <= L
         nA = min(L, nf);
-        nB = min(L, nf + LNh);
+        nB = min(L, nf + LNh - 1);
         kA = max(1, k0_vec(nf-1) - range_I);
         kB = min(Nfft, k0_vec(nf-1) + range_I);
-        TFR_r(kA:kB, nA:nB) = 1;
+        A = zeros(Nfft,nB-nA+1); 
+        A(kA:kB,:) = 1;
+        TFR_r = [TFR_r A];
     end
+   TFR_r = TFR_r(min_k:max_k,:);
 end
 
 [~, rE_vec] = sort(RRP_E_stable, 'descend');
@@ -57,7 +80,9 @@ for r0=rE_vec
     r_rel_vec(r0) = r0;
     
     k0_vec = RRP_stable(r0, :);
-    supp_r0 = RRP_supp(Nfft, L, k0_vec, LNh, range_I);
+    supp_r0 = zeros(Nfft, L);
+    [A_r0, n1, n2, k1, k2] = RRP_supp(Nfft, L, k0_vec, LNh, range_I);
+    supp_r0(k1:k2, n1:n2) = A_r0;
     
     r_vec = zeros(1, Ns);
     
@@ -69,12 +94,12 @@ for r0=rE_vec
             if r_rel_vec(r) > 0 || r_vec(r) > 0
                 continue;
             end
-            supp_r = RRP_supp(Nfft, L, RRP_stable(r, :), LNh, range_I);
+            [supp_r, n1, n2, k1, k2] = RRP_supp(Nfft, L, RRP_stable(r, :), LNh, range_I);
             
-            supp_I = supp_r0.*supp_r;
+            supp_I = supp_r0(k1:k2, n1:n2).*supp_r;
             if sum(supp_I(:)) > 0
                 r_vec(r) = r;
-                supp_r0 = max(supp_r0, supp_r);
+                supp_r0(k1:k2, n1:n2) = max(supp_r0(k1:k2, n1:n2), supp_r);
                 isec = 1;
                 break;
             end

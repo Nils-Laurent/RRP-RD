@@ -21,11 +21,18 @@ poly_degree = 5;
 
 %% SNR (RD + MR) computation
 clwin = 10;
-SNR_IN = -10:2:5;
-NRep = 10;
+SNR_IN = -10:2:4;
+NRep = 30;
 
-[SNR_NEW, SNR_C_RD, SNR_MB_RD, SNR_IF_NEW, SNR_IF_C_RD, SNR_IF_MB_RD] =...
-    test_RD_MR(modes_LC,IFs_LC,clwin,sigma_LC,Nfft,poly_degree,SNR_IN,NRep);
+[SNR_NEW_LCR, SNR_NEW_MR, SNR_S_MR, SNR_MB_MR, SNR_IF_NEW, SNR_IF_C_RD, SNR_IF_MB_RD] =...
+    test_RD_MR(modes_LC, IFs_LC, clwin, sigma_LC, Nfft, poly_degree, SNR_IN, NRep);
 
-plot_SNR_modes(SNR_IN, SNR_NEW, SNR_C_RD, SNR_MB_RD);
+plot_SNR_modes(SNR_IN, SNR_NEW_LCR, SNR_NEW_MR, SNR_S_MR, SNR_MB_MR);
+savefig('F5_MR_LC');
+saveas(gcf,'F5_MR_LC','epsc');
+close all;
+
 plot_SNR_IFs(SNR_IN, SNR_IF_NEW, SNR_IF_C_RD, SNR_IF_MB_RD);
+savefig('F4_RD_LC');
+saveas(gcf,'F4_RD_LC','epsc');
+close all;

@@ -8,13 +8,13 @@ LNh = 20;
 % std_QM = 1/(sqrt(2*pi)*sigma_s)*sqrt( 1+sigma_s^4*real(QM(k, n))^2 );
 sigma_I = 1/(sqrt(2*pi)*sigma_s);
 range_I = ceil(3*sigma_I*Nfft/L);
-range_I
 
 %% compute matrix of LC based frequency sum
 S_LM = novel_LM_sum(TFR, QM, sigma_s);
+[~, S_LM_sorted] = sort(S_LM, 'descend');
 
 %% compute stability information
-[RRP_stable, RRP_E_stable] = novel_RRP_stable(TFR, S_LM, QM, sigma_s, Nr, scale);
+[RRP_stable, RRP_E_stable] = novel_RRP_stable(TFR, S_LM, S_LM_sorted, QM, sigma_s, Nr, scale);
 % fprintf("R energy figure\n");
 % pause;
 
@@ -82,8 +82,8 @@ end
 % axis square
 % colormap(flipud(gray));
 % title("TFR inter");
-% % pause;
-% 
+% pause;
+
 % figure;
 % imagesc(1:L, 1:Nfft, abs(TFR));
 % set(gca,'ydir','normal');
