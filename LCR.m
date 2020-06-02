@@ -16,12 +16,4 @@ for p = 1:Nr
     modes(p, :) = L*itfrstft(TFR_denoised_r, cas, g);
 end
 
-% figure;
-% imagesc(abs(TFR_denoised));
-% % imagesc((0:L-1)*T/L, (0:Nfft-1)*L/(Nfft*T), abs(TFR));
-% set(gca,'ydir','normal');
-% colormap(flipud(gray));
-% axis square
-% pause;
-
 end

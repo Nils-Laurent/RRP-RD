@@ -33,57 +33,6 @@ for p = 1:Nr
     sigma_vec = 1/(sqrt(2*pi)*sigma_s)*sqrt( 1+sigma_s^4*Qv.^2 );
     range_vec(p, :) = ceil(3*sigma_vec*Nfft/L);
 end
-% 
-% %% post proc.
-% STFT_inter = zeros(size(STFT));
-% for r=1:length(RRP_E_inter)
-%     for n=1:L
-%         kr = RRP_inter(r, n);
-%         if kr > 0
-%             STFT_inter(kr, n) = RRP_E_inter(r);
-%         end
-%     end
-% end
-% 
-% Qs = zeros(size(Qs_1));
-% R_ip = STFT_inter;
-% for p=1:Nr
-%     R_modes = zeros(size(STFT));
-%     for p2=1:Nr
-%         if p2 == p
-%             % keep RRP group concerning mode "p"
-%             continue;
-%         end
-% 
-%         % remove RRP group concerning "p2" neq "p" in input R_ip
-%         for n=1:L
-%             k = Cs(p2, n);
-%             if k > 0
-%                 R_modes(k, n) = R_ip(k, n);
-%                 R_ip(k, n) = 0;
-%             end
-%         end
-%     end
-% 
-%     [Cs(p, :), Qs(p, :), ~, ~, R_new] =...
-%         novel_WPF(R_ip, Cs(p, :), range_vec(p, :), degree_WPF);
-%     R_ip = R_new;
-%     R_ip = R_ip + R_modes;
-% end
-% 
-% figure;
-% imagesc((0:L-1)/L, (0:Nfft-1)*L/Nfft, STFT_inter);
-% set(gca,'ydir','normal');
-% axis square
-% colormap(flipud(gray));
-% title("post proc");
-% hold on;
-% plot((0:L-1)/L, polyval(Qs(1, :), (0:L-1)/L), 'r');
-% plot((0:L-1)/L, polyval(Qs_1(1, :), (0:L-1)/L), 'b--');
-% plot((0:L-1)/L, polyval(Qs(2, :), (0:L-1)/L), 'r');
-% plot((0:L-1)/L, polyval(Qs_1(2, :), (0:L-1)/L), 'b--');
-% hold off;
-% pause;
 
 [Cs, Qs, E_max, crossing] = novel_WPF_iterate(STFT, RRP_inter, RRP_E_inter, range_vec, Nr, degree_WPF);
 

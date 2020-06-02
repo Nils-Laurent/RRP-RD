@@ -33,7 +33,7 @@ ind = 0;
 for TOL = TOLs
     ind = ind + 1;
     TOL
-    [Cs, XCs, Qs, TFR_inter] = novel_RRP_RD_splin(STFT(1:128, :), QM(1:128, :), sigma_s, Nr, TOL);
+    [Cs, XCs, Qs, TFR_inter] = novel_RRP_RD_spline(STFT(1:128, :), QM(1:128, :), sigma_s, Nr, TOL);
     TCs = (XCs - 1)/L;
     IF_E = (fnval(Qs, (XCs - 1)/L) - 1)*L/Nfft;
     IM_E = fnval(fnder(Qs, 1), (XCs - 1)/L)*L/Nfft; % derivative of Qs
@@ -46,7 +46,7 @@ for TOL = TOLs
     KY_upper = min(128, Cs + range_vec);
     [m_simple, ~] = MR_simple(STFT(1:128,:), Nfft, XCs, g, Lg, KY_lower, KY_upper, Nr);
     m_simple = real(m_simple);
-    [m_LCR, STFT_LCR] = LCR2(STFT(1:128,:), g, Lg, Nfft, XCs, IF_E, IM_E, sigma_s);
+    [m_LCR, STFT_LCR] = LCR_partial(STFT(1:128,:), g, Lg, Nfft, XCs, IF_E, IM_E, sigma_s);
     m_LCR = real(m_LCR);
     
     if TOL == 3
@@ -67,20 +67,20 @@ set(groot, 'defaultLegendInterpreter', 'latex');
 
 figure;
 imagesc((0:L-1)/L*T, (0:127)*L/(Nfft*T), abs(STFT(1:128, :)));
-% imagesc((0:L-1)/L*T, (0:Nfft-1)*L/(Nfft*T), abs(STFT));
 set(gca,'ydir','normal');
 colormap(flipud(gray));
 axis square
 xlabel('time', 'interpreter', 'latex');
 ylabel('frequency', 'interpreter', 'latex');
-% title("STFT");
-% ylim([0, 127*L/(Nfft*T)]);
 xAX = get(gca,'XAxis');
 set(xAX,'FontSize', 26);
 yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
+savefig('F_GW_STFT');
+saveas(gcf,'F_GW_STFT','epsc');
+close all;
 
 figure;
 imagesc((0:L-1)/L*T, (0:127)*L/(Nfft*T), abs(denoised_STFT));
@@ -89,7 +89,6 @@ colormap(flipud(gray));
 axis square
 xlabel('time', 'interpreter', 'latex');
 ylabel('frequency', 'interpreter', 'latex');
-% title("denoised STFT");
 ylim([0, 127*L/(Nfft*T)]);
 xAX = get(gca,'XAxis');
 set(xAX,'FontSize', 26);
@@ -97,6 +96,9 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
+savefig('F_GW_LCR_STFT');
+saveas(gcf,'F_GW_LCR_STFT','epsc');
+close all;
 
 figure;
 imagesc((0:L-1)/L*T, (0:127)*L/(Nfft*T), abs(TFR_inter));
@@ -105,12 +107,7 @@ colormap(flipud(gray));
 axis square
 xlabel('time', 'interpreter', 'latex');
 ylabel('frequency', 'interpreter', 'latex');
-% title("RRP post intersection");
 hold on;
-% plot(TCs_vec(1, :)*T, IFs_vec(1, :)/T, '-.',...
-%     'LineWidth', 2, 'DisplayName', 'RRP-RD (tol = 1)');
-% plot(TCs_vec(2, :)*T, IFs_vec(2, :)/T, 'm--',...
-% 	'LineWidth', 2, 'DisplayName', 'RRP-RD (tol = 2)');
 plot(TCs_vec(3, :)*T, IFs_vec(3, :)/T,...
     'LineWidth', 2, 'DisplayName', 'RRP-RD (tol = 3)');
 
@@ -123,9 +120,11 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
+savefig('F_GW_RD');
+saveas(gcf,'F_GW_RD','epsc');
+close all;
 
 figure;
-% title("Comparison with reference");
 hold on;
 plot((1:L-1)/L*T, sw, 'LineWidth', 2,...
     'DisplayName', 'Numerical relativity');
@@ -143,3 +142,6 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
+savefig('F_GW_NR');
+saveas(gcf,'F_GW_NR','epsc');
+close all;

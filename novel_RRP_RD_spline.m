@@ -1,4 +1,4 @@
-function [Cs, XCs, Qs, TFR_inter] = novel_RRP_RD_splin(TFR, QM, sigma_s, Nr, TOL)
+function [Cs, XCs, Qs, TFR_inter] = novel_RRP_RD_spline(TFR, QM, sigma_s, Nr, TOL)
 scale = 8;
 [Nfft, L] = size(TFR);
 LNh = ceil(L/200);
@@ -19,54 +19,7 @@ fprintf("compute stable RRP\n");
 fprintf("check if RRP are intersecting\n");
 [RRP_inter, RRP_E_inter, ~] = novel_RRP_intersection(TFR, RRP_stable, RRP_E_stable, range_I, LNh);
 
-% RRP_inter = RRP_stable;
-% RRP_E_inter = RRP_E_stable;
-
-% save tmp_inter_info RRP_inter RRP_E_inter
-
-% RRP_inter = 0;
-% RRP_E_inter = 0;
-% load tmp_inter_info
-
-%% poly approximation minimization
-
-% fprintf("polynomial approximation\n");
-% range_vec = range_I*ones(Nr, L);
-% RRP_E_inter
-% [~, Qs, ~, ~] = novel_WPF_iterate(TFR, RRP_inter, RRP_E_inter, range_vec, Nr, degree_WPF);
-% 
-% for p = 1:Nr
-%     Qp = polyder(Qs(p, :));
-%     Qv = polyval(Qp, (0:L-1)/L);
-%     sigma_vec = 1/(sqrt(2*pi)*sigma_s)*sqrt( 1+sigma_s^4*Qv.^2 );
-%     range_vec(p, :) = ceil(3*sigma_vec*Nfft/L);
-% end
-% 
-% [Cs, Qs, E_max, crossing] = novel_WPF_iterate(TFR, RRP_inter, RRP_E_inter, range_vec, Nr, degree_WPF);
-% if crossing == 1
-%     fprintf('Warning : modes are crossing\n');
-% end
-% 
-% for p = 1:Nr
-%     Qp = polyder(Qs(p, :));
-%     Qv = polyval(Qp, (0:L-1)/L);
-%     sigma_vec = 1/(sqrt(2*pi)*sigma_s)*sqrt( 1+sigma_s^4*Qv.^2 );
-%     range_vec(p, :) = ceil(3*sigma_vec*Nfft/L);
-% end
-% 
-% KY_lower = zeros(Nr, L);
-% KY_upper = zeros(Nr, L);
-% for p = 1:Nr
-%     PY = polyval(Qs(p, :), (0:L-1)/L);
-% 
-%     KY_upper(p, :) = round(PY*Nfft/L) + range_vec(p, :) + 1;
-%     KY_upper(p, :) = min(Nfft, max(1, KY_upper(p, :)));
-%     KY_lower(p, :) = round(PY*Nfft/L) - range_vec(p, :) + 1;
-%     KY_lower(p, :) = min(Nfft, max(1, KY_lower(p, :)));
-% end
-
-
-%% splin
+%% spline
 
 [~, id] = max(RRP_E_inter);
 RRP_max = RRP_inter(id, :);

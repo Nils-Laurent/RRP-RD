@@ -77,5 +77,5 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
-savefig('F1_zoom');
-saveas(gcf,'F1_zoom','epsc');
+savefig('F1_zeros_LC');
+saveas(gcf,'F1_zeros_LC','epsc');
