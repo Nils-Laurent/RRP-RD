@@ -1,12 +1,11 @@
 close all;
 
-load fig1-observed-Hanford.txt
-t1=fig1_observed_Hanford(:,1);
-s1=fig1_observed_Hanford(:,2);
+load GW-observed-Hanford.txt
+t1=GW_observed_Hanford(:,1);
+s1=GW_observed_Hanford(:,2);
 
-load fig1-waveform-H.txt
-% load fig1-residual-H.txt
-sw=fig1_waveform_H(:,2)';
+load GW-waveform-H.txt
+sw=GW_waveform_H(:,2)';
 
 t = t1(:);
 s = s1(:);
@@ -78,9 +77,9 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
-savefig('F_GW_STFT');
-saveas(gcf,'F_GW_STFT','epsc');
-close all;
+% savefig('F_GW_STFT');
+% saveas(gcf,'F_GW_STFT','epsc');
+% close all;
 
 figure;
 imagesc((0:L-1)/L*T, (0:127)*L/(Nfft*T), abs(denoised_STFT));
@@ -96,9 +95,9 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
-savefig('F_GW_LCR_STFT');
-saveas(gcf,'F_GW_LCR_STFT','epsc');
-close all;
+% savefig('F_GW_LCR_STFT');
+% saveas(gcf,'F_GW_LCR_STFT','epsc');
+% close all;
 
 figure;
 imagesc((0:L-1)/L*T, (0:127)*L/(Nfft*T), abs(TFR_inter));
@@ -120,9 +119,9 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
-savefig('F_GW_RD');
-saveas(gcf,'F_GW_RD','epsc');
-close all;
+% savefig('F_GW_RD');
+% saveas(gcf,'F_GW_RD','epsc');
+% close all;
 
 figure;
 hold on;
@@ -142,6 +141,6 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
-savefig('F_GW_NR');
-saveas(gcf,'F_GW_NR','epsc');
-close all;
+% savefig('F_GW_NR');
+% saveas(gcf,'F_GW_NR','epsc');
+% close all;
