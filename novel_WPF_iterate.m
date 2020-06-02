@@ -45,6 +45,18 @@ for ir=1:Ni
         continue;
     end
     
+%     figure;
+%     imagesc(1:L, 1:Nfft, R_inter);
+%     set(gca,'ydir','normal');
+%     axis square
+%     colormap(flipud(gray));
+%     title("initialization");
+%     hold on;
+%     plot(1:L, Cs_in_it);
+%     hold off;
+%     pause;
+
+    
     % test polynomials
     E_new =  0;
     R_ip = R_inter;
@@ -70,6 +82,14 @@ for ir=1:Ni
             novel_WPF(R_ip, Cs_in_it(p, :), range_vec(p, :), degree_WPF);
         R_ip = R_new;
         R_ip = R_ip + R_modes;
+        
+%         figure;
+%         imagesc(1:L, 1:Nfft, R_ip);
+%         set(gca,'ydir','normal');
+%         axis square
+%         colormap(flipud(gray));
+%         title("R ip");
+%         pause;
     end
     
     %% check if modes are crossing in the TF plane

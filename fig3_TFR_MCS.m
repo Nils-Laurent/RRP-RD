@@ -26,15 +26,6 @@ s2 = exp(2*1i*pi*phi2);
 s_exp_LC = s1 + s2;
 sigma_exp_LC = 0.0241;
 
-B1 = log(2000);
-B2 = log(2800);
-phi1 = 2000*t+exp(B1*t)/B1;
-phi2 = 200*t+exp(B2*t)/B2;
-s1 = exp(2*1i*pi*phi1);
-s2 = exp(2*1i*pi*phi2);
-s_exp = s1 + s2;
-sigma_exp = 0.0336;
-
 Nr = 2;
 Nfft = 512;
 cas = 1;
@@ -106,24 +97,32 @@ savefig('F3_RD_exp_LC');
 saveas(gcf,'F3_RD_exp_LC','epsc');
 close all;
 
-%% TFR exp
+%% old : TFR exp
+% B1 = log(2000);
+% B2 = log(2800);
+% phi1 = 2000*t+exp(B1*t)/B1;
+% phi2 = 200*t+exp(B2*t)/B2;
+% s1 = exp(2*1i*pi*phi1);
+% s2 = exp(2*1i*pi*phi2);
+% s_exp = s1 + s2;
+% sigma_exp = 0.0336;
 % noise = randn(L,1)+1i*randn(L,1);
 % save noise_MCS_exp noise
-load noise_MCS_exp
-s_noise = sigmerge(s_exp, noise, SNR_IN);
-[g, Lg] = create_gaussian_window(L, Nfft, sigma_exp);
-
-[TFR, ~, ~, q] = FM_operators(s_noise, Nfft, g, Lg, sigma_exp);
-[Cs, Qs, KY_lower, KY_upper, ~] = novel_RRP_RD(TFR, q, sigma_exp, Nr, poly_degree);
-
-fig_TFR(TFR);
-savefig('F3_TFR_exp');
-saveas(gcf,'F3_TFR_exp','epsc');
-close all;
-
-fig_RD(TFR, Cs, Qs, KY_lower, KY_upper);
-savefig('F3_RD_exp');
-saveas(gcf,'F3_RD_exp','epsc');
+% load noise_MCS_exp
+% s_noise = sigmerge(s_exp, noise, SNR_IN);
+% [g, Lg] = create_gaussian_window(L, Nfft, sigma_exp);
+% 
+% [TFR, ~, ~, q] = FM_operators(s_noise, Nfft, g, Lg, sigma_exp);
+% [Cs, Qs, KY_lower, KY_upper, ~] = novel_RRP_RD(TFR, q, sigma_exp, Nr, poly_degree);
+% 
+% fig_TFR(TFR);
+% savefig('F3_TFR_exp');
+% saveas(gcf,'F3_TFR_exp','epsc');
+% close all;
+% 
+% fig_RD(TFR, Cs, Qs, KY_lower, KY_upper);
+% savefig('F3_RD_exp');
+% saveas(gcf,'F3_RD_exp','epsc');
 % close all;
 
 %% fig functions
@@ -168,22 +167,22 @@ function fig_RD(TFR, Cs, Qs, KY_lower, KY_upper)
     
     hold on;
     plot(time_vec, QY_lower(1, :), 'r-.',...
-        'DisplayName', '$TF^-_1$', 'LineWidth', 1);
+        'DisplayName', '$F^-_1$', 'LineWidth', 1);
     plot(time_vec, QY_upper(1, :), 'r--',...
-        'DisplayName', '$TF^+_2$', 'LineWidth', 1);
+        'DisplayName', '$F^+_2$', 'LineWidth', 1);
     plot(time_vec, QY1, 'r',...
         'DisplayName', '$D_1^{fin}$', 'LineWidth', 1);
     plot(time_vec, Cs(1, :), 'c',...
-        'DisplayName', '$\mathcal{M}^*_1$', 'LineWidth', 2);
+        'DisplayName', '$\mathcal{M}_1^{fin}$', 'LineWidth', 2);
     
     plot(time_vec, QY_lower(2, :), 'b-.',...
-        'DisplayName', '$TF^-_2$', 'LineWidth', 1);
+        'DisplayName', '$F^-_2$', 'LineWidth', 1);
     plot(time_vec, QY_upper(2, :), 'b--',...
-        'DisplayName', '$TF^+_2$', 'LineWidth', 1);
+        'DisplayName', '$F^+_2$', 'LineWidth', 1);
     plot(time_vec, QY2, 'b',...
         'DisplayName', '$D_2^{fin}$', 'LineWidth', 1);
     plot(time_vec, Cs(2, :), 'y',...
-        'DisplayName', '$\mathcal{M}^*_2$', 'LineWidth', 2);
+        'DisplayName', '$\mathcal{M}_2^{fin}$', 'LineWidth', 2);
     hold off;
     
     xlabel('time', 'interpreter', 'latex');

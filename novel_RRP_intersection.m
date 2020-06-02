@@ -103,8 +103,17 @@ for r0=rE_vec
                 isec = 1;
                 break;
             end
+            
         end
     end
+    
+%     figure;
+%     imagesc(1:L, 1:Nfft, supp_r0);
+%     set(gca,'ydir','normal');
+%     colormap(flipud(gray));
+%     axis square
+%     title("supp_r0");
+%     pause;
     
     %% merge process
 %     fprintf("intersection : r0 = %u\n", r0);

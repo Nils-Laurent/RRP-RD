@@ -27,12 +27,12 @@ for k=1:length(SNR_IN)
         fprintf('VFB MB, ');
         [Cs_VFB_MB] = VFB_MB_exridge_MCS(STFT, sigma_s, QM, 2, Nr);
         [K_lower, K_upper] = MR_interval(Cs_VFB_MB, QM, Nfft, sigma_s);
-        [m_MB_RD, ~] = MR_simple(STFT, g, Lg, K_lower, K_upper, Nr);
+        [m_MB_RD, ~] = MR_simple(STFT, Nfft, 1:L, g, Lg, K_lower, K_upper, Nr);
 
         fprintf('classic, ');
         [Cs_simple] = exridge_mult(STFT, Nr, 0, 0, clwin);
         [K_lower, K_upper] = MR_interval(Cs_simple, QM, Nfft, sigma_s);
-        [m_C_RD, ~] = MR_simple(STFT, g, Lg, K_lower, K_upper, Nr);
+        [m_C_RD, ~] = MR_simple(STFT, Nfft, 1:L, g, Lg, K_lower, K_upper, Nr);
 
         fprintf('RRP RD, ');
         [~, Qs, KY_lower, KY_upper, ~] = novel_RRP_RD(STFT, QM, sigma_s, Nr, poly_d);
@@ -48,7 +48,7 @@ for k=1:length(SNR_IN)
         end
 
         fprintf("LCR\n");
-        [m_NEW_simple, ~] = MR_simple(STFT, g, Lg, KY_lower, KY_upper, Nr);
+        [m_NEW_simple, ~] = MR_simple(STFT, Nfft, 1:L, g, Lg, KY_lower, KY_upper, Nr);
         [m_NEW_LCR, ~] = LCR(STFT, IF_E, IM_E, sigma_s, cas);
 
         %% SNR signal
@@ -59,6 +59,9 @@ for k=1:length(SNR_IN)
             x_NEW_s = snr(ref, m_NEW_simple(p, X_win) - ref);
             x_S_RD = snr(ref, m_C_RD(p, X_win) - ref);
             x_MB_RD = snr(ref, m_MB_RD(p, X_win) - ref);
+            if isnan(x_NEW_LCR + x_NEW_s + x_S_RD + x_MB_RD)
+                error('MR : one of the SNR is NaN');
+            end
         
             SNR_NEW_LCR(p, k) = SNR_NEW_LCR(p, k) + x_NEW_LCR;
             SNR_NEW_s(p, k) = SNR_NEW_s(p, k) + x_NEW_s;
@@ -72,6 +75,9 @@ for k=1:length(SNR_IN)
             x_NEW = snr(ref, IF_E(p, X_win) - ref);
             x_S_RD = snr(ref, L/Nfft*(Cs_simple(p, X_win) -1) - ref);
             x_MB_RD = snr(ref, L/Nfft*(Cs_VFB_MB(p, X_win) -1) - ref);
+            if isnan(x_NEW + x_S_RD + x_MB_RD)
+                error('IF : one of the SNR is NaN');
+            end
         
             SNR_IF_NEW(p, k) = SNR_IF_NEW(p, k) + x_NEW;
             SNR_IF_S_RD(p, k) = SNR_IF_S_RD(p, k) + x_S_RD;

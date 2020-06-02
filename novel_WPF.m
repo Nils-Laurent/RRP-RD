@@ -75,7 +75,7 @@ end
 % CV2 = C_new;
 % CV2(CV2 == 0) = nan;
 % CV2 = CV2';
-% 
+
 % figure;
 % imagesc(1:L, 1:Nfft, R_energy);
 % hold on;

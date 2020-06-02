@@ -130,5 +130,36 @@ end
 % colormap(flipud(gray));
 % title("R energy");
 
+%% id info
+
+% R_id = zeros(Nfft, L);
+% R_c = zeros(Nfft, L);
+% for r=1:Ns
+%     kr_vec = RRP_stable(r, :);
+%     for n=1:L
+%         if kr_vec(n) == 0
+%             continue;
+%         end
+%         R_id(kr_vec(n), n) = r;
+%         R_c(kr_vec(n), n) = R_c(kr_vec(n), n) + 1;
+%     end
+% end
+
+% figure;
+% imagesc(1:L, 1:Nfft, R_id);
+% set(gca,'ydir','normal');
+% axis square
+% colormap(flipud(gray));
+% title("R id");
+
+% figure;
+% imagesc(1:L, 1:Nfft, R_c);
+% set(gca,'ydir','normal');
+% axis square
+% colormap(flipud(gray));
+% title("R c");
+% 
+% pause;
+
 end
 

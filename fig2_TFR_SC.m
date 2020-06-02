@@ -122,13 +122,13 @@ function fig_RD(TFR, Cs, Qs, KY_lower, KY_upper)
     colormap(flipud(gray));
     hold on;
     plot((0:L-1)/L, QY_lower, 'r-.',...
-        'DisplayName', '$TF^-$', 'LineWidth', 1);
+        'DisplayName', '$F^-$', 'LineWidth', 1);
     plot((0:L-1)/L, QY_upper, 'r--',...
-        'DisplayName', '$TF^+$', 'LineWidth', 1);
+        'DisplayName', '$F^+$', 'LineWidth', 1);
     plot((0:L-1)/L, QY, 'r',...
         'DisplayName', '$D^{fin}$', 'LineWidth', 1);
     plot((0:L-1)/L, Cs, 'c',...
-        'DisplayName', '$\mathcal{M}^*$', 'LineWidth', 2);
+        'DisplayName', '$\mathcal{M}^{fin}$', 'LineWidth', 2);
     hold off;
     xlabel('time', 'interpreter', 'latex');
     ylabel('frequency', 'interpreter', 'latex');

@@ -1,47 +1,92 @@
-function [Cs, Qs, KY_lower, KY_upper, E_max] = novel_RRP_RD(TFR, QM, sigma_s, Nr, degree_WPF)
+function [Cs, Qs, KY_lower, KY_upper, E_max] = novel_RRP_RD(STFT, QM, sigma_s, Nr, degree_WPF)
 scale = 8;
-LNh = 20;
-%degree_WPF = 5;
+LNh = 20; % Length of Neighborhood, Delta_t
+% degree_WPF = 5;
 
-[Nfft, L] = size(TFR);
+[Nfft, L] = size(STFT);
 
 % std_QM = 1/(sqrt(2*pi)*sigma_s)*sqrt( 1+sigma_s^4*real(QM(k, n))^2 );
 sigma_I = 1/(sqrt(2*pi)*sigma_s);
 range_I = ceil(3*sigma_I*Nfft/L);
 
 %% compute matrix of LC based frequency sum
-S_LM = novel_LM_sum(TFR, QM, sigma_s);
+S_LM = novel_LM_sum(STFT, QM, sigma_s);
 [~, S_LM_sorted] = sort(S_LM, 'descend');
 
 %% compute stability information
-[RRP_stable, RRP_E_stable] = novel_RRP_stable(TFR, S_LM, S_LM_sorted, QM, sigma_s, Nr, scale);
-% fprintf("R energy figure\n");
-% pause;
+% fprintf("compute stable RRP\n");
+[RRP_stable, RRP_E_stable] = novel_RRP_stable(STFT, S_LM, S_LM_sorted, QM, sigma_s, Nr, scale);
 
 %% merge intersecting structures
-[RRP_inter, RRP_E_inter, ~] = novel_RRP_intersection(TFR, RRP_stable, RRP_E_stable, range_I, LNh);
-
-% save tmp_inter_info RRP_inter RRP_E_inter
-
-% RRP_inter = 0;
-% RRP_E_inter = 0;
-% load tmp_inter_info
+% fprintf("check if RRP are intersecting\n");
+[RRP_inter, RRP_E_inter, ~] = novel_RRP_intersection(STFT, RRP_stable, RRP_E_stable, range_I, LNh);
 
 %% poly approximation minimization
 
-%range_in = ones(1, L);
 % fprintf("polynomial approximation\n");
 range_vec = range_I*ones(Nr, L);
-[~, Qs, ~, ~] = novel_WPF_iterate(TFR, RRP_inter, RRP_E_inter, range_vec, Nr, degree_WPF);
+[Cs, Qs_1, E_max, crossing] = novel_WPF_iterate(STFT, RRP_inter, RRP_E_inter, range_vec, Nr, degree_WPF);
 
 for p = 1:Nr
-    Qp = polyder(Qs(p, :));
+    Qp = polyder(Qs_1(p, :));
     Qv = polyval(Qp, (0:L-1)/L);
     sigma_vec = 1/(sqrt(2*pi)*sigma_s)*sqrt( 1+sigma_s^4*Qv.^2 );
     range_vec(p, :) = ceil(3*sigma_vec*Nfft/L);
 end
+% 
+% %% post proc.
+% STFT_inter = zeros(size(STFT));
+% for r=1:length(RRP_E_inter)
+%     for n=1:L
+%         kr = RRP_inter(r, n);
+%         if kr > 0
+%             STFT_inter(kr, n) = RRP_E_inter(r);
+%         end
+%     end
+% end
+% 
+% Qs = zeros(size(Qs_1));
+% R_ip = STFT_inter;
+% for p=1:Nr
+%     R_modes = zeros(size(STFT));
+%     for p2=1:Nr
+%         if p2 == p
+%             % keep RRP group concerning mode "p"
+%             continue;
+%         end
+% 
+%         % remove RRP group concerning "p2" neq "p" in input R_ip
+%         for n=1:L
+%             k = Cs(p2, n);
+%             if k > 0
+%                 R_modes(k, n) = R_ip(k, n);
+%                 R_ip(k, n) = 0;
+%             end
+%         end
+%     end
+% 
+%     [Cs(p, :), Qs(p, :), ~, ~, R_new] =...
+%         novel_WPF(R_ip, Cs(p, :), range_vec(p, :), degree_WPF);
+%     R_ip = R_new;
+%     R_ip = R_ip + R_modes;
+% end
+% 
+% figure;
+% imagesc((0:L-1)/L, (0:Nfft-1)*L/Nfft, STFT_inter);
+% set(gca,'ydir','normal');
+% axis square
+% colormap(flipud(gray));
+% title("post proc");
+% hold on;
+% plot((0:L-1)/L, polyval(Qs(1, :), (0:L-1)/L), 'r');
+% plot((0:L-1)/L, polyval(Qs_1(1, :), (0:L-1)/L), 'b--');
+% plot((0:L-1)/L, polyval(Qs(2, :), (0:L-1)/L), 'r');
+% plot((0:L-1)/L, polyval(Qs_1(2, :), (0:L-1)/L), 'b--');
+% hold off;
+% pause;
 
-[Cs, Qs, E_max, crossing] = novel_WPF_iterate(TFR, RRP_inter, RRP_E_inter, range_vec, Nr, degree_WPF);
+[Cs, Qs, E_max, crossing] = novel_WPF_iterate(STFT, RRP_inter, RRP_E_inter, range_vec, Nr, degree_WPF);
+
 if crossing == 1
     fprintf('Warning : modes are crossing\n');
 end
@@ -53,8 +98,8 @@ for p = 1:Nr
     range_vec(p, :) = ceil(3*sigma_vec*Nfft/L);
 end
 
-KY_lower = zeros(Nr, L);
 KY_upper = zeros(Nr, L);
+KY_lower = zeros(Nr, L);
 for p = 1:Nr
     PY = polyval(Qs(p, :), (0:L-1)/L);
 
@@ -64,37 +109,49 @@ for p = 1:Nr
     KY_lower(p, :) = min(Nfft, max(1, KY_lower(p, :)));
 end
 
-% show RRP intersect
 
-TFR_inter = zeros(size(TFR));
-for r=1:length(RRP_E_inter)
-    for n=1:L
-        kr = RRP_inter(r, n);
-        if kr > 0
-            TFR_inter(kr, n) = RRP_E_inter(r);
-        end
-    end
-end
+%% TFR figures
 
 % figure;
-% imagesc(1:L, 1:Nfft, TFR_inter);
+% imagesc(1:L, 1:Nfft, S_LM);
+% set(gca,'ydir','normal');
+% axis square
+% colormap(flipud(gray));
+% title("S LM");
+% 
+% TFR_stable = zeros(size(TFR));
+% for r=1:length(RRP_E_stable)
+%     for n=1:L
+%         kr = RRP_stable(r, n);
+%         if kr > 0
+%             TFR_stable(kr, n) = RRP_E_stable(r);
+%         end
+%     end
+% end
+% 
+% figure;
+% imagesc(1:L, 1:Nfft, TFR_stable);
+% set(gca,'ydir','normal');
+% axis square
+% colormap(flipud(gray));
+% title("TFR stable");
+
+% STFT_inter = zeros(size(STFT));
+% for r=1:length(RRP_E_inter)
+%     for n=1:L
+%         kr = RRP_inter(r, n);
+%         if kr > 0
+%             STFT_inter(kr, n) = RRP_E_inter(r);
+%         end
+%     end
+% end
+
+% figure;
+% imagesc(1:L, 1:Nfft, STFT_inter);
 % set(gca,'ydir','normal');
 % axis square
 % colormap(flipud(gray));
 % title("TFR inter");
-% pause;
-
-% figure;
-% imagesc(1:L, 1:Nfft, abs(TFR));
-% set(gca,'ydir','normal');
-% axis square
-% colormap(flipud(gray));
-% title("TF regions");
-% hold on;
-% plot(1:L, KY_lower, 'b');
-% plot(1:L, KY_upper, 'r');
-% hold off;
-% % pause;
 
 end
 

@@ -30,9 +30,9 @@ NRep = 30;
 plot_SNR_modes(SNR_IN, SNR_NEW_LCR, SNR_NEW_MR, SNR_S_MR, SNR_MB_MR);
 savefig('F5_MR_cos');
 saveas(gcf,'F5_MR_cos','epsc');
-close all;
+% close all;
 
 plot_SNR_IFs(SNR_IN, SNR_IF_NEW, SNR_IF_C_RD, SNR_IF_MB_RD);
 savefig('F4_RD_cos');
 saveas(gcf,'F4_RD_cos','epsc');
-close all;
+% close all;
