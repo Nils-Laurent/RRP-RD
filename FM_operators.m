@@ -1,4 +1,4 @@
-function [STFT, omega, omega2, q] = FM_operators(s, Nfft, g, Lg, sigma_s)
+function [STFT, omega, omega2, q, STFT_xgp, tau] = FM_operators(s, Nfft, g, Lg, sigma_s)
 %% retrieve_phase : retrieve signal phase with its' first and second derivatives
 %
 % INPUTS:
@@ -25,6 +25,9 @@ q      = zeros(Nfft,L);
 tau    = zeros(Nfft,L);
 STFT   = zeros(Nfft,L);
 
+STFT_xgp   = zeros(Nfft,L);
+% STFT_x2g   = zeros(Nfft,L);
+
 ft = (0:Nfft-1)';
 
 % Window related variables
@@ -39,6 +42,8 @@ for n=1:L
 
     % STFT, window xg
     vxg = fft(s(n+time_inst).*(time_inst)'/L.*g(Lg+time_inst+1),Nfft)/L;
+    
+%     STFT_x2g(:, n) = fft(s(n+time_inst).*(time_inst.^2)'/L.*g(Lg+time_inst+1),Nfft)/L;
 
     % operator Lx (dtau)
     tau(:,n)  = vxg./vg;
@@ -55,6 +60,7 @@ for n=1:L
 
     % STFT, windox xgp
     vxgp  = fft(s(n+time_inst).*(time_inst)'/L.*gp(Lg+time_inst+1),Nfft)/L;
+    STFT_xgp(:, n) = vxgp;
 
     % computation of the two different omega
 
