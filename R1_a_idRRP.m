@@ -25,7 +25,7 @@ Energy_TFR = zeros(size(STFT));
 
 N_RRP = 0;
 id_TFR = zeros(size(ASTFT_LM_th));
-SPEC = abs(STFT).^2;
+rSPEC = abs(STFT);
 for n=1:(L-1)
     [vec_LM] = find(ASTFT_LM_th(:, n));
     [next_vec_LM] = find(ASTFT_LM_th(:, n+1));
@@ -62,7 +62,7 @@ for n=1:(L-1)
                 N_RRP = N_RRP + 1;
                 id_RRP = N_RRP;
                 id_TFR(k, n) = id_RRP;
-                Energy_RRP(id_RRP) = Energy_RRP(id_RRP) + SPEC(k, n);
+                Energy_RRP(id_RRP) = Energy_RRP(id_RRP) + rSPEC(k, n);
                 
                 % map RRP
                 M_map = M_map + 1;
@@ -71,7 +71,7 @@ for n=1:(L-1)
                 k_map_RRP(M_map) = k;
             end
             id_TFR(kb_LM, n+1) = id_RRP;
-            Energy_RRP(id_RRP) = Energy_RRP(id_RRP) + SPEC(kb_LM, n+1);
+            Energy_RRP(id_RRP) = Energy_RRP(id_RRP) + rSPEC(kb_LM, n+1);
             
             % map RRP
             M_map = M_map + 1;
@@ -86,19 +86,6 @@ Energy_RRP = Energy_RRP(1:N_RRP);
 id_map_RRP = id_map_RRP(1:M_map);
 n_map_RRP = n_map_RRP(1:M_map);
 k_map_RRP = k_map_RRP(1:M_map);
-
-% [id_map_RRP, IS] = sort(id_map_RRP);
-
-for m=1:M_map
-    n = n_map_RRP(m);
-    k = k_map_RRP(m);
-    if Energy_TFR(k, n) > 0
-        fprintf("ERROR\n");
-        pause;
-    end
-    Energy_TFR(k, n) = 1;
-end
-
 
 %% compute RRP energy
 for m=1:M_map
