@@ -22,13 +22,13 @@ for n=1:length(SNR_IN)
         s_noise = sigmerge(transpose(s_in), noise, SNR_IN(n));
         [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
         X_win = 2*Lh:(L-2*Lh);
-        [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, Nfft, g, Lh, sigma_s);
+        [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_s);
 
         fprintf('Classic, ');
         [Cs_simple] = exridge_mult(STFT, Nr, 0, 0, clwin);
         Spl_Cl = struct('spline', cell(1, Nr));
         for m=1:Nr
-            Spl_Cl(m).spline = spline((0:L-1)/L, Cs_simple(m, :));
+            Spl_Cl(m).spline = spline((0:L-1)/L, (Cs_simple(m, :) - 1)*L/Nfft);
         end
         [m_SR_Cl, m_LCR_Cl, IF_Cl] = R1_MR_and_LCR_spl(STFT, Spl_Cl, g, Lh, sigma_s, Nr, Nfft, L);
 
@@ -36,7 +36,7 @@ for n=1:length(SNR_IN)
         [Cs_VFB_MB] = VFB_MB_exridge_MCS(STFT, sigma_s, QM, 2, Nr);
         Spl_MB = struct('spline', cell(1, Nr));
         for m=1:Nr
-            Spl_MB(m).spline = spline((0:L-1)/L, Cs_VFB_MB(m, :));
+            Spl_MB(m).spline = spline((0:L-1)/L, (Cs_VFB_MB(m, :) - 1)*L/Nfft);
         end
         [m_SR_MB, m_LCR_MB, IF_MB] = R1_MR_and_LCR_spl(STFT, Spl_MB, g, Lh, sigma_s, Nr, Nfft, L);
         

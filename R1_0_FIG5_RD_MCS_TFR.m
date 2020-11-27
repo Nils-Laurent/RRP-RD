@@ -44,15 +44,23 @@ s_exp = s1 + s2;
 sigma_exp = 0.0241;
 
 %% test
-SNR_in = -10;
+SNR_in = -8;
 Nfft = 512;
 smooth_p = 1 - 10^(-2);
 Nr = 2;
 
+% 3 FIG sig. MCS
+% 3 Courbes (spline, std sup, std inf)
+
+%% LC
+
+%% cos
+
+%% exp
 noise = randn(L, 1)+1i*randn(L, 1);
 s_noise = sigmerge(s_exp, noise, SNR_in);
 [g, Lh] = create_gaussian_window(L, Nfft, sigma_exp);
-[STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, Nfft, g, Lh, sigma_exp);
+[STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_exp);
 [Spl_exp, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_exp, smooth_p);
 
 IF1 = fnval(Spl_exp(1).spline, t);
@@ -75,15 +83,32 @@ yAX = get(gca,'YAxis');
 set(yAX,'FontSize', 26);
 hold on;
 Y = [0.9290 0.6940 0.1250];
-plot(t, IF1 - R1, 'r-.');
-plot(t, IF1, 'c');
-plot(t, IF1 + R1, 'r--');
-plot(t, IF2 - R2, 'r-.');
-plot(t, IF2, 'c');
-plot(t, IF2 + R2, 'r--');
+plot(t, IF1 - R1, 'b-',...
+    'Linewidth', 2,...
+    'DisplayName', '$F_1^-$');
+plot(t, IF1, 'c',...
+    'Linewidth', 2,...
+    'DisplayName', '$D_1^{fin}$');
+plot(t, IF1 + R1, 'r-',...
+    'Linewidth', 2,...
+    'DisplayName', '$F_1^+$');
+plot(t, IF2 - R2, 'b--',...
+    'Linewidth', 2,...
+    'DisplayName', '$F_2^-$');
+plot(t, IF2, 'c--',...
+    'Linewidth', 2,...
+    'DisplayName', '$D_2^{fin}$');
+plot(t, IF2 + R2, 'r--',...
+    'Linewidth', 2,...
+    'DisplayName', '$F_2^+$');
 hold off;
+lgd = legend('Location', 'southeast');
+lgd.FontSize = 24;
+xlabel('time', 'interpreter', 'latex');
+ylabel('frequency', 'interpreter', 'latex');
+xAX = get(gca,'XAxis');
+set(xAX,'FontSize', 26);
+yAX = get(gca,'YAxis');
+set(yAX,'FontSize', 26);
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
-
-% 3 FIG sig. MCS
-% 3 Courbes (spline, std sup, std inf)

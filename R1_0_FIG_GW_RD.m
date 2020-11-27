@@ -96,15 +96,25 @@ for smooth_p = smooth_vec
 
     [m_simple, m_LCR, IFs_p, STFT_LCR] = R1_MR_and_LCR_spl(STFT2, Spl, g, Lh, sigma_s, Nr, Nfft, Fs);
     IFs_vec(ind, :) = IFs_p(1, :);
+    m_simple = real(m_simple);
+    m_LCR = real(m_LCR);
 
     % 2: Retier la demie fenetre
     SNRs(ind, 1) = snr(sw(X_cmp), m_simple(X_cmp) - sw(X_cmp));
     SNRs(ind, 2) = snr(sw(X_cmp), m_LCR(X_cmp) - sw(X_cmp));
+    figure;
+    hold on;
+    plot(X_cmp, sw(X_cmp), 'LineWidth', 2,...
+        'DisplayName', 'Numerical relativity');
+    plot(X_cmp, m_LCR(X_cmp), '-.', 'LineWidth', 2,...
+        'DisplayName', 'RRP-MR-LCR');
+    hold off;
+    legend;
 end
 SNRs
 IFs_vec = IFs_vec*Fs1/Fs;
 Fs = Fs1;
-% return;
+return;
 
 
 %% figs

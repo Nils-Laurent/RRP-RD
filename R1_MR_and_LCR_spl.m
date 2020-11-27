@@ -20,19 +20,19 @@ for p=1:Nr
     K_upper(p, :) = K_mid + range_p;
 end
 
-% [N_Y, ~] = size(STFT);
-% figure;
-% imagesc(t, (0:N_Y-1)*Fs/Nfft, abs(STFT));
-% set(gca,'ydir','normal');
-% colormap(flipud(gray));
-% axis square;
-% hold on;
-% for m_spl=1:Nr
-%     plot(t, IF_vecs(m_spl, :) - Range_eta(p, :), '--');
-%     plot(t, IF_vecs(m_spl, :));
-%     plot(t, IF_vecs(m_spl, :) + Range_eta(p, :), '--');
-% end
-% hold off;
+[N_Y, ~] = size(STFT);
+figure;
+imagesc(t, (0:N_Y-1)*Fs/Nfft, abs(STFT));
+set(gca,'ydir','normal');
+colormap(flipud(gray));
+axis square;
+hold on;
+for m_spl=1:Nr
+    plot(t, IF_vecs(m_spl, :) - Range_eta(p, :), '--');
+    plot(t, IF_vecs(m_spl, :));
+    plot(t, IF_vecs(m_spl, :) + Range_eta(p, :), '--');
+end
+hold off;
 % pause;
 
 [m_SR, ~] = MR_simple(STFT, Fs, Nfft, g, Lh, K_lower, K_upper, Nr);
