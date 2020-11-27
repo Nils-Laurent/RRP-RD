@@ -1,4 +1,4 @@
-function [STFT, omega, omega2, q, STFT_xgp, tau] = FM_operators(s, Nfft, g, Lg, sigma_s)
+function [STFT, omega, omega2, q, STFT_xgp, tau] = FM_operators(s, Fs, Nfft, g, Lg, sigma_s)
 %% retrieve_phase : retrieve signal phase with its' first and second derivatives
 %
 % INPUTS:
@@ -31,17 +31,17 @@ STFT_xgp   = zeros(Nfft,L);
 ft = (0:Nfft-1)';
 
 % Window related variables
-t0  = ((0:2*Lg)'-Lg)/L;
+t0  = ((0:2*Lg)'-Lg)/Fs;
 gp = (-2*pi/sigma_s^2*t0).*g;
 gpp = (-2*pi/sigma_s^2 + 4*pi^2/sigma_s^4*(t0.^2)).*g;
 
 for n=1:L
     % STFT, window g
     time_inst = -min([Lg,n-1]):min([Lg,L-n]);
-    vg = fft(s(n+time_inst).*g(Lg+time_inst+1),Nfft)/L;
+    vg = fft(s(n+time_inst).*g(Lg+time_inst+1),Nfft)/Fs;
 
     % STFT, window xg
-    vxg = fft(s(n+time_inst).*(time_inst)'/L.*g(Lg+time_inst+1),Nfft)/L;
+    vxg = fft(s(n+time_inst).*(time_inst)'/Fs.*g(Lg+time_inst+1),Nfft)/Fs;
     
 %     STFT_x2g(:, n) = fft(s(n+time_inst).*(time_inst.^2)'/L.*g(Lg+time_inst+1),Nfft)/L;
 
@@ -49,17 +49,17 @@ for n=1:L
     tau(:,n)  = vxg./vg;
 
     % STFT, window gp
-    vgp = fft(s(n+time_inst).*gp(Lg+time_inst+1),Nfft)/L;
+    vgp = fft(s(n+time_inst).*gp(Lg+time_inst+1),Nfft)/Fs;
 
 
     % operator omega
-    omega(:,n) = L/Nfft*ft-real(vgp/2/1i/pi./vg);
+    omega(:,n) = Fs/Nfft*ft-real(vgp/2/1i/pi./vg);
 
     % STFT, window gppsip(1:Lg-1) = diff(psi(1:Lg))*L^2/Nfft;p
-    vgpp  = fft(s(n+time_inst).*gpp(Lg+time_inst+1),Nfft)/L;
+    vgpp  = fft(s(n+time_inst).*gpp(Lg+time_inst+1),Nfft)/Fs;
 
     % STFT, windox xgp
-    vxgp  = fft(s(n+time_inst).*(time_inst)'/L.*gp(Lg+time_inst+1),Nfft)/L;
+    vxgp  = fft(s(n+time_inst).*(time_inst)'/Fs.*gp(Lg+time_inst+1),Nfft)/Fs;
     STFT_xgp(:, n) = vxgp;
 
     % computation of the two different omega

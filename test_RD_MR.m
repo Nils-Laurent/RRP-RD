@@ -1,99 +1,85 @@
-function [SNR_NEW_LCR, SNR_NEW_s, SNR_S_RD, SNR_MB_RD,...
-    SNR_IF_NEW, SNR_IF_S_RD, SNR_IF_MB_RD] = test_RD_MR(...
-    modes, IFs, clwin, sigma_s, Nfft, poly_d, SNR_IN, NRep)
+function [SNR_out] = test_RD_MR(...
+    modes, IFs, clwin, sigma_s, Nfft, smooth_p, SNR_IN, NRep)
 
-cas = 1;
+N_SNR = length(SNR_IN);
+N_sp = length(smooth_p);
+
 [Nr, L] = size(modes);
 s_in = sum(modes, 1);
 
-SNR_NEW_LCR = zeros(Nr, length(SNR_IN));
-SNR_NEW_s = zeros(Nr, length(SNR_IN));
-SNR_S_RD = zeros(Nr, length(SNR_IN));
-SNR_MB_RD = zeros(Nr, length(SNR_IN));
+Sub = struct('Cl', zeros(Nr, N_SNR),...
+    'MB', zeros(Nr, N_SNR),...
+    'New', zeros(Nr, N_SNR, N_sp));
+SNR_out.MR = Sub;
+SNR_out.LCR = Sub;
+SNR_out.RD = Sub;
 
-SNR_IF_NEW = zeros(Nr, length(SNR_IN));
-SNR_IF_S_RD = zeros(Nr, length(SNR_IN));
-SNR_IF_MB_RD = zeros(Nr, length(SNR_IN));
-
-for k=1:length(SNR_IN)
-    for l=1:NRep
-        fprintf('snr %d/%d, rep %d/%d\n', k, length(SNR_IN), l, NRep);
+for n=1:length(SNR_IN)
+    for k=1:NRep
+        fprintf('snr %d/%d, rep %d/%d\n', n, length(SNR_IN), k, NRep);
         
         noise = randn(L, 1)+1i*randn(L, 1);
-        s_noise = sigmerge(transpose(s_in), noise, SNR_IN(k));
-        [g, Lg] = create_gaussian_window(L, Nfft, sigma_s);
-        [STFT, ~, ~, QM] = FM_operators(s_noise, Nfft, g, Lg, sigma_s);
+        s_noise = sigmerge(transpose(s_in), noise, SNR_IN(n));
+        [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
+        X_win = 2*Lh:(L-2*Lh);
+        [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, Nfft, g, Lh, sigma_s);
+
+        fprintf('Classic, ');
+        [Cs_simple] = exridge_mult(STFT, Nr, 0, 0, clwin);
+        Spl_Cl = struct('spline', cell(1, Nr));
+        for m=1:Nr
+            Spl_Cl(m).spline = spline((0:L-1)/L, Cs_simple(m, :));
+        end
+        [m_SR_Cl, m_LCR_Cl, IF_Cl] = R1_MR_and_LCR_spl(STFT, Spl_Cl, g, Lh, sigma_s, Nr, Nfft, L);
 
         fprintf('VFB MB, ');
         [Cs_VFB_MB] = VFB_MB_exridge_MCS(STFT, sigma_s, QM, 2, Nr);
-        [K_lower, K_upper] = MR_interval(Cs_VFB_MB, QM, Nfft, sigma_s);
-        [m_MB_RD, ~] = MR_simple(STFT, Nfft, 1:L, g, Lg, K_lower, K_upper, Nr);
-
-        fprintf('classic, ');
-        [Cs_simple] = exridge_mult(STFT, Nr, 0, 0, clwin);
-        [K_lower, K_upper] = MR_interval(Cs_simple, QM, Nfft, sigma_s);
-        [m_C_RD, ~] = MR_simple(STFT, Nfft, 1:L, g, Lg, K_lower, K_upper, Nr);
-
-        fprintf('RRP RD, ');
-        [~, Qs, KY_lower, KY_upper, ~] = novel_RRP_RD(STFT, QM, sigma_s, Nr, poly_d);
-        Cs = zeros(size(modes));
-        IF_E = zeros(size(modes));
-        IM_E = zeros(size(modes));
-        for p = 1:Nr
-            PY = polyval(Qs(p, :), (0:L-1)/L);
-            IF_E(p, :) = PY;
-            IM_E(p, :) = polyval(polyder(Qs(p, :)), (0:L-1)/L);
-            Cs(p, :) = round(PY*Nfft/L) + 1;
-            Cs(p, :) = min(Nfft, max(1, Cs(p, :)));
+        Spl_MB = struct('spline', cell(1, Nr));
+        for m=1:Nr
+            Spl_MB(m).spline = spline((0:L-1)/L, Cs_VFB_MB(m, :));
+        end
+        [m_SR_MB, m_LCR_MB, IF_MB] = R1_MR_and_LCR_spl(STFT, Spl_MB, g, Lh, sigma_s, Nr, Nfft, L);
+        
+        %% Classic and MB SNR
+        for m = 1:Nr
+            ref_mode = modes(m, X_win);
+            ref_IF = IFs(m, X_win);
+            
+            x_MR_Cl = snr(ref_mode, m_SR_Cl(m, X_win) - ref_mode);
+            x_MR_MB = snr(ref_mode, m_SR_MB(m, X_win) - ref_mode);
+            x_LCR_Cl = snr(ref_mode, m_LCR_Cl(m, X_win) - ref_mode);
+            x_LCR_MB = snr(ref_mode, m_LCR_MB(m, X_win) - ref_mode);
+            x_Cl_RD = snr(ref_IF, IF_Cl(m, X_win) - ref_IF);
+            x_MB_RD = snr(ref_IF, IF_MB(m, X_win) - ref_IF);
+        
+            SNR_out.MR.Cl(m, n) = SNR_out.MR.Cl(m, n) + x_MR_Cl/NRep;
+            SNR_out.MR.MB(m, n) = SNR_out.MR.MB(m, n) + x_MR_MB/NRep;
+            SNR_out.LCR.Cl(m, n) = SNR_out.LCR.Cl(m, n) + x_LCR_Cl/NRep;
+            SNR_out.LCR.MB(m, n) = SNR_out.LCR.MB(m, n) + x_LCR_MB/NRep;
+            SNR_out.RD.Cl(m, n) = SNR_out.RD.Cl(m, n) + x_Cl_RD/NRep;
+            SNR_out.RD.MB(m, n) = SNR_out.RD.MB(m, n) + x_MB_RD/NRep;
         end
 
-        fprintf("LCR\n");
-        [m_NEW_simple, ~] = MR_simple(STFT, Nfft, 1:L, g, Lg, KY_lower, KY_upper, Nr);
-        [m_NEW_LCR, ~] = LCR(STFT, IF_E, IM_E, sigma_s, cas);
-
-        %% SNR signal
-        X_win = 2*Lg:(L-2*Lg);
-        for p = 1:Nr
-            ref = modes(p, X_win);
-            x_NEW_LCR = snr(ref, m_NEW_LCR(p, X_win) - ref);
-            x_NEW_s = snr(ref, m_NEW_simple(p, X_win) - ref);
-            x_S_RD = snr(ref, m_C_RD(p, X_win) - ref);
-            x_MB_RD = snr(ref, m_MB_RD(p, X_win) - ref);
-            if isnan(x_NEW_LCR + x_NEW_s + x_S_RD + x_MB_RD)
-                error('MR : one of the SNR is NaN');
+        %% RRP
+        fprintf('RRP RD\n');
+        for ns=1:N_sp
+            [Spl, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_s, smooth_p(ns));
+            [m_SR_New, m_LCR_New, IF_New] = R1_MR_and_LCR_spl(STFT, Spl, g, Lh, sigma_s, Nr, Nfft, L);
+            
+            for m = 1:Nr
+                ref_mode = modes(m, X_win);
+                ref_IF = IFs(m, X_win);
+                
+                x_MR_New = snr(ref_mode, m_SR_New(m, X_win) - ref_mode);
+                x_LCR_New = snr(ref_mode, m_LCR_New(m, X_win) - ref_mode);
+                x_RD_New = snr(ref_IF, IF_New(m, X_win) - ref_IF);
+                SNR_out.MR.New(m, n, ns) = SNR_out.MR.New(m, n, ns) + x_MR_New/NRep;
+                SNR_out.LCR.New(m, n, ns) = SNR_out.LCR.New(m, n, ns) + x_LCR_New/NRep;
+                SNR_out.RD.New(m, n, ns) = SNR_out.RD.New(m, n, ns) + x_RD_New/NRep;
             end
-        
-            SNR_NEW_LCR(p, k) = SNR_NEW_LCR(p, k) + x_NEW_LCR;
-            SNR_NEW_s(p, k) = SNR_NEW_s(p, k) + x_NEW_s;
-            SNR_S_RD(p, k) = SNR_S_RD(p, k) + x_S_RD;
-            SNR_MB_RD(p, k) = SNR_MB_RD(p, k) + x_MB_RD;
-        end
-        
-        %% SNR IF
-        for p = 1:Nr
-            ref = IFs(p, X_win);
-            x_NEW = snr(ref, IF_E(p, X_win) - ref);
-            x_S_RD = snr(ref, L/Nfft*(Cs_simple(p, X_win) -1) - ref);
-            x_MB_RD = snr(ref, L/Nfft*(Cs_VFB_MB(p, X_win) -1) - ref);
-            if isnan(x_NEW + x_S_RD + x_MB_RD)
-                error('IF : one of the SNR is NaN');
-            end
-        
-            SNR_IF_NEW(p, k) = SNR_IF_NEW(p, k) + x_NEW;
-            SNR_IF_S_RD(p, k) = SNR_IF_S_RD(p, k) + x_S_RD;
-            SNR_IF_MB_RD(p, k) = SNR_IF_MB_RD(p, k) + x_MB_RD;
         end
     end
 end
-
-SNR_NEW_LCR = SNR_NEW_LCR/NRep;
-SNR_NEW_s = SNR_NEW_s/NRep;
-SNR_S_RD = SNR_S_RD/NRep;
-SNR_MB_RD = SNR_MB_RD/NRep;
-
-SNR_IF_NEW = SNR_IF_NEW/NRep;
-SNR_IF_S_RD = SNR_IF_S_RD/NRep;
-SNR_IF_MB_RD = SNR_IF_MB_RD/NRep;
 
 end
 

@@ -1,4 +1,4 @@
-function [] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, P, sigma_s)
+function [Modes_max, E_max] = R1_RRP_RD(STFT, QM, omega, tau, Fs, Nfft, Nr, sigma_s, smooth_p)
 
 [STFT_LM] = LM_from_STFT(STFT);
 
@@ -15,118 +15,40 @@ A_LM_g3 = abs(STFT_LM).*(abs(STFT) > C3_gamma);
     R1_a_idRRP(A_LM_g2, STFT, QM);
 NB = length(Energy_RP);
 
+% figure;
+% imagesc(A_LM_g2);
+% set(gca,'ydir','normal');
+% colormap(flipud(gray));
+% title("LM g2");
+% 
+% figure;
+% imagesc(A_LM_g3);
+% set(gca,'ydir','normal');
+% colormap(flipud(gray));
+% title("LM g3");
+% pause;
+
 [id_Basins_TFR, Energy_basins, E2_basins, E_Basins_TFR, E2_Basins_TFR, EB_RP_TFR] =...
-    R1_b_idBasin(ASTFT_g2, A_LM_g3, tau, omega, id_RP_TFR, RP_maps, NB);
-
-[id_Zones_TFR, Energy_Zones, idZ_RP_TFR, EZ_RP_TFR, E_Zones_TFR] =...
-    R1_c_idZones(ASTFT_g2, id_Basins_TFR, Energy_basins, id_RP_TFR);
-
-%% new data based on g3
-EZ_new = zeros(size(Energy_Zones));
-EB_new = zeros(size(Energy_basins));
-for n=1:L
-    for k=1:Nfft
-        e_g3 = A_LM_g3(k, n);
-        if e_g3 > 0
-            id_zone = idZ_RP_TFR(k, n);
-            EZ_new(id_zone) = EZ_new(id_zone) + e_g3;
-            
-            id_basin = id_Basins_TFR(k, n);
-            if id_basin > 0
-                EB_new(id_basin) = EB_new(id_basin) + e_g3;
-            end
-        end
-    end
-end
-
-EZ_new_TFR = zeros(size(E_Zones_TFR));
-EZ_new_RP_TFR = zeros(size(E_Zones_TFR));
-EB_new_TFR = zeros(size(E_Basins_TFR));
-for n=1:L
-    for k=1:Nfft
-        id_zone = id_Zones_TFR(k, n);
-        if id_zone > 0
-            EZ_new_TFR(k, n) = EZ_new(id_zone);
-        end
-        
-        id_zone_RP = idZ_RP_TFR(k, n);
-        if id_zone_RP > 0
-            EZ_new_RP_TFR(k, n) = EZ_new(id_zone_RP);
-        end
-        
-        id_basin = id_Basins_TFR(k, n);
-        if id_basin > 0
-            EB_new_TFR(k, n) = EB_new(id_basin);
-        end
-    end
-end
-E2_basins = EB_new;
-E2_Basins_TFR = EB_new_TFR;
-Energy_Zones = EZ_new;
-
-%% figures
-% figure;
-% imagesc(abs(A_LM_g2));
-% set(gca,'ydir','normal');
-% colormap(flipud(gray));
-% title("LM thresh (2)");
-% pbaspect([1 1 1]);
-% set(gcf, 'Position',  [0, 0, 1000, 1000]);
-% 
-% figure;
-% imagesc(abs(A_LM_g3));
-% set(gca,'ydir','normal');
-% colormap(flipud(gray));
-% title("LM thresh (3)");
-% pbaspect([1 1 1]);
-% set(gcf, 'Position',  [0, 0, 1000, 1000]);
-
-% max_vec = zeros(2, L);
-% for n=1:L
-%     E_vec = E_Zones_TFR(:, n);
-%     [ES_vec, s_pos] = sort(E_vec, 'descend');
-%     [~, u_pos] = unique(nonzeros(ES_vec), 'stable');
-%     if length(u_pos) >= 1
-%         max_vec(1, n) = s_pos(u_pos(1));
-%     end
-%     if length(u_pos) >= 2
-%         max_vec(2, n) = s_pos(u_pos(2));
-%     end
-% end
-% 
-% figure;
-% imagesc(E_Zones_TFR);
-% set(gca,'ydir','normal');
-% colormap(flipud(gray));
-% title("Energy zones");
-% hold on;
-% plot(max_vec(1, :));
-% plot(max_vec(2, :));
-% hold off;
-% pbaspect([1 1 1]);
-% set(gcf, 'Position',  [0, 0, 1000, 1000]);
+    R1_b_idBasin(ASTFT_g2, A_LM_g3, tau, omega, id_RP_TFR, RP_maps, NB, Nfft, Fs);
 
 % figure;
 % imagesc(E_Basins_TFR);
 % set(gca,'ydir','normal');
 % colormap(flipud(gray));
-% title("Energy basins");
-% pbaspect([1 1 1]);
-% set(gcf, 'Position',  [0, 0, 1000, 1000]);
+% title("E basins");
+
+[id_Zones_TFR, Energy_Zones, idZ_RP_TFR, EZ_RP_TFR, E_Zones_TFR] =...
+    R1_c_idZones(ASTFT_g2, id_Basins_TFR, Energy_basins, id_RP_TFR);
 
 % figure;
-% imagesc(E2_Basins_TFR);
+% imagesc(E_Zones_TFR);
 % set(gca,'ydir','normal');
 % colormap(flipud(gray));
-% title("Energy2 basins");
-% pbaspect([1 1 1]);
-% set(gcf, 'Position',  [0, 0, 1000, 1000]);
+% title("E zones");
+% pause;
 
-% return;
-% return;
-% close all;
-R1_e_spline(id_Basins_TFR, id_Zones_TFR, idZ_RP_TFR, E2_Basins_TFR, A_LM_g3, E2_basins, Energy_Zones, P);
-% R1_e_spline(id_Zones_TFR, idZ_RP_TFR, EZ_new_TFR, EZ_new_RP_TFR, EB_new_TFR, STFT, A_LM_g3, EZ_new, NB, sigma_s, P);
+[Modes_max, E_max] = R1_e_spline(E_Zones_TFR, id_Basins_TFR, id_Zones_TFR,...
+    idZ_RP_TFR, E2_Basins_TFR, A_LM_g3, E2_basins, Energy_Zones, Nr, smooth_p, Fs, Nfft);
 
 return;
 
