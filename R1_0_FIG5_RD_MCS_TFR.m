@@ -44,71 +44,75 @@ s_exp = s1 + s2;
 sigma_exp = 0.0241;
 
 %% test
-SNR_in = -8;
+SNR_in = -10;
 Nfft = 512;
-smooth_p = 1 - 10^(-2);
+smooth_p = 1 - 10^(-4);
 Nr = 2;
 
 % 3 FIG sig. MCS
 % 3 Courbes (spline, std sup, std inf)
 
 %% LC
+% noise = randn(L, 1)+1i*randn(L, 1);
+load('noise_R1_TFR_RD_LC.mat');
+s_noise = sigmerge(s_LC, noise, SNR_in);
+[g, Lh] = create_gaussian_window(L, Nfft, sigma_LC);
+[STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_LC);
+[Spl_LC, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_LC, smooth_p);
+
+Spl = Spl_LC;
+sigma_s = sigma_LC;
+IF1 = fnval(Spl(1).spline, t);
+DF1 = fnval(fnder(Spl(1).spline), t);
+R1 = 1/(sqrt(2*pi)*sigma_s)*sqrt(1 + sigma_s^4*DF1.^2);
+IF2 = fnval(Spl(2).spline, t);
+DF2 = fnval(fnder(Spl(2).spline), t);
+R2 = 1/(sqrt(2*pi)*sigma_s)*sqrt(1 + sigma_s^4*DF2.^2);
+
+% save('noise_R1_TFR_RD_LC.mat', 'noise');
+fname = 'fig_R1_TFR_RD_LC';
+R1_plot_fig5(STFT, IF1, R1, IF2, R2, fname);
+% return;
 
 %% cos
+% noise = randn(L, 1)+1i*randn(L, 1);
+load('noise_R1_TFR_RD_cos.mat');
+s_noise = sigmerge(s_cos, noise, SNR_in);
+[g, Lh] = create_gaussian_window(L, Nfft, sigma_cos);
+[STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_cos);
+[Spl_cos, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_cos, smooth_p);
+
+Spl = Spl_cos;
+sigma_s = sigma_cos;
+IF1 = fnval(Spl(1).spline, t);
+DF1 = fnval(fnder(Spl(1).spline), t);
+R1 = 1/(sqrt(2*pi)*sigma_s)*sqrt(1 + sigma_s^4*DF1.^2);
+IF2 = fnval(Spl(2).spline, t);
+DF2 = fnval(fnder(Spl(2).spline), t);
+R2 = 1/(sqrt(2*pi)*sigma_s)*sqrt(1 + sigma_s^4*DF2.^2);
+
+% save('noise_R1_TFR_RD_cos.mat', 'noise');
+fname = 'fig_R1_TFR_RD_cos';
+R1_plot_fig5(STFT, IF1, R1, IF2, R2, fname);
+% return;
 
 %% exp
-noise = randn(L, 1)+1i*randn(L, 1);
+% noise = randn(L, 1)+1i*randn(L, 1);
+load('noise_R1_TFR_RD_exp.mat');
 s_noise = sigmerge(s_exp, noise, SNR_in);
 [g, Lh] = create_gaussian_window(L, Nfft, sigma_exp);
 [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_exp);
 [Spl_exp, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_exp, smooth_p);
 
-IF1 = fnval(Spl_exp(1).spline, t);
-DF1 = fnval(fnder(Spl_exp(1).spline), t);
-R1 = 1/(sqrt(2*pi)*sigma_LC)*sqrt(1 + sigma_LC^4*DF1.^2);
-IF2 = fnval(Spl_exp(2).spline, t);
-DF2 = fnval(fnder(Spl_exp(2).spline), t);
-R2 = 1/(sqrt(2*pi)*sigma_LC)*sqrt(1 + sigma_LC^4*DF2.^2);
+Spl = Spl_exp;
+sigma_s = sigma_exp;
+IF1 = fnval(Spl(1).spline, t);
+DF1 = fnval(fnder(Spl(1).spline), t);
+R1 = 1/(sqrt(2*pi)*sigma_s)*sqrt(1 + sigma_s^4*DF1.^2);
+IF2 = fnval(Spl(2).spline, t);
+DF2 = fnval(fnder(Spl(2).spline), t);
+R2 = 1/(sqrt(2*pi)*sigma_s)*sqrt(1 + sigma_s^4*DF2.^2);
 
-figure;
-imagesc((0:L-1)/L, (0:Nfft-1)*L/Nfft, abs(STFT));
-set(gca,'ydir','normal');
-colormap(flipud(gray));
-axis square;
-xlabel('time', 'interpreter', 'latex');
-ylabel('frequency', 'interpreter', 'latex');
-xAX = get(gca,'XAxis');
-set(xAX,'FontSize', 26);
-yAX = get(gca,'YAxis');
-set(yAX,'FontSize', 26);
-hold on;
-Y = [0.9290 0.6940 0.1250];
-plot(t, IF1 - R1, 'b-',...
-    'Linewidth', 2,...
-    'DisplayName', '$F_1^-$');
-plot(t, IF1, 'c',...
-    'Linewidth', 2,...
-    'DisplayName', '$D_1^{fin}$');
-plot(t, IF1 + R1, 'r-',...
-    'Linewidth', 2,...
-    'DisplayName', '$F_1^+$');
-plot(t, IF2 - R2, 'b--',...
-    'Linewidth', 2,...
-    'DisplayName', '$F_2^-$');
-plot(t, IF2, 'c--',...
-    'Linewidth', 2,...
-    'DisplayName', '$D_2^{fin}$');
-plot(t, IF2 + R2, 'r--',...
-    'Linewidth', 2,...
-    'DisplayName', '$F_2^+$');
-hold off;
-lgd = legend('Location', 'southeast');
-lgd.FontSize = 24;
-xlabel('time', 'interpreter', 'latex');
-ylabel('frequency', 'interpreter', 'latex');
-xAX = get(gca,'XAxis');
-set(xAX,'FontSize', 26);
-yAX = get(gca,'YAxis');
-set(yAX,'FontSize', 26);
-pbaspect([1 1 1]);
-set(gcf, 'Position',  [0, 0, 1000, 1000])
+% save('noise_R1_TFR_RD_exp.mat', 'noise');
+fname = 'fig_R1_TFR_RD_exp';
+R1_plot_fig5(STFT, IF1, R1, IF2, R2, fname);

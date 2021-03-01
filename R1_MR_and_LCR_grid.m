@@ -1,4 +1,4 @@
-function [m_SR, m_LCR, IF_vecs, STFT_LCR] = R1_MR_and_LCR_spl(STFT, Spl, g, Lh, sigma_s, Nr, Nfft, Fs)
+function [m_SR, m_LCR, IF_vecs, STFT_LCR] = R1_MR_and_LCR_grid(STFT, QM, Cs, g, Lh, sigma_s, Nr, Nfft, Fs)
 
 [~, L] = size(STFT);
 
@@ -11,8 +11,12 @@ K_upper = zeros(Nr, L);
 Range_eta = zeros(Nr, L);
 
 for p=1:Nr
-    IF_vecs(p, :) = fnval(Spl(p).spline, t);
-    IM_vecs(p, :) = fnval(fnder(Spl(p).spline), t);
+%     IF_vecs(p, :) = fnval(Spl(p).spline, t);
+    IF_vecs(p, :) = (Cs(p, :) - 1)*Fs/Nfft;
+%     IM_vecs(p, :) = fnval(fnder(Spl(p).spline), t);
+    for n=1:L
+        IM_vecs(p, n) = real(QM(Cs(p, n), n));
+    end
     K_mid = round(IF_vecs(p, :)*Nfft/Fs) + 1;
     Range_eta(p, :) = 1/(sqrt(2*pi)*sigma_s)*sqrt(1 + sigma_s^4*IM_vecs(p, :).^2);
     range_p = ceil(3*Range_eta(p, :)*Nfft/Fs);

@@ -23,7 +23,7 @@ load noise_F1_zero
 sn_LC = sigmerge(s_LC, noise, -10);
 [g, Lg] = create_gaussian_window(L, Nfft, sigma_LC);
 
-[TFR, ~, ~, q] = FM_operators(sn_LC, Nfft, g, Lg, sigma_LC);
+[TFR, ~, ~, q] = FM_operators(sn_LC, L, Nfft, g, Lg, sigma_LC);
 
 S_LM = zeros(size(TFR));
 

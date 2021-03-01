@@ -1,0 +1,8 @@
+*.mat
+*.eps
+*.fig
+*.m~
+*.txt
+
+app_sig/
+LIGO_file/

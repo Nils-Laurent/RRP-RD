@@ -1,4 +1,4 @@
-function [id_TFR, Energy_RRP, Energy_TFR, RP_maps] = R1_a_idRRP(STFT_LM_th, STFT, QM)
+function [id_TFR, Energy_RRP, Energy_TFR, RP_maps] = R1_a_idRRP(STFT_LM_th, STFT, QM, Nfft, Fs)
 
 ASTFT_LM_th = abs(STFT_LM_th);
 
@@ -21,7 +21,7 @@ Energy_TFR = zeros(size(STFT));
 
 %% identify RRP
 
-[Nfft, L] = size(ASTFT_LM_th);
+[N_Y, L] = size(ASTFT_LM_th);
 
 N_RRP = 0;
 id_TFR = zeros(size(ASTFT_LM_th));
@@ -34,21 +34,21 @@ for n=1:(L-1)
         continue;
     end
     
-    for k=2:(Nfft-1)
+    for k=2:(N_Y-1)
         if ASTFT_LM_th(k, n) == 0
             continue;
         end
         
         %% next
-        rqa_grid = round(real(QM(k, n))*Nfft/(L^2));
-        kb = max(1, min(Nfft, k + rqa_grid));
+        rqa_grid = round(real(QM(k, n))*Nfft/(Fs^2));
+        kb = max(1, min(N_Y, k + rqa_grid));
         
         [~, arg_w] = min(abs(next_vec_LM - kb));
         kb_LM = next_vec_LM(arg_w);
         
         %% next_prev
-        rqb_grid = round(real(QM(kb_LM, n+1))*Nfft/(L^2));
-        ka = max(1, min(Nfft, kb_LM - rqb_grid));
+        rqb_grid = round(real(QM(kb_LM, n+1))*Nfft/(Fs^2));
+        ka = max(1, min(N_Y, kb_LM - rqb_grid));
         
         [~, arg_ka] = min(abs(vec_LM - ka));
         ka_LM = vec_LM(arg_ka);

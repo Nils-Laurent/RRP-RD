@@ -12,7 +12,7 @@ A_LM_g2 = abs(STFT_LM).*(abs(STFT) > C2_gamma);
 A_LM_g3 = abs(STFT_LM).*(abs(STFT) > C3_gamma);
 
 [id_RP_TFR, Energy_RP, E_RP_TFR, RP_maps] =...
-    R1_a_idRRP(A_LM_g2, STFT, QM);
+    R1_a_idRRP(A_LM_g2, STFT, QM, Nfft, Fs);
 NB = length(Energy_RP);
 
 % figure;
@@ -46,6 +46,8 @@ NB = length(Energy_RP);
 % colormap(flipud(gray));
 % title("E zones");
 % pause;
+
+% fprintf("Set splines\n");
 
 [Modes_max, E_max] = R1_e_spline(E_Zones_TFR, id_Basins_TFR, id_Zones_TFR,...
     idZ_RP_TFR, E2_Basins_TFR, A_LM_g3, E2_basins, Energy_Zones, Nr, smooth_p, Fs, Nfft);

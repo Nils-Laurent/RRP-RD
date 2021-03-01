@@ -44,13 +44,36 @@ sigma_exp = 0.0241;
 %% Test
 clwin = 10;
 Nfft = 512;
-smooth_p = [1 - 10^(-2), 1 - 10^(-3), 1 - 10^(-4)];
-% SNR_IN = [-8, -6, -4];
-SNR_IN = -4;
-NRep = 1;
+% smooth_p = [1 - 10^(-2), 1 - 10^(-3), 1 - 10^(-4)];
+smooth_p = [1 - 10^(-4), 1 - 10^(-5), 1 - 10^(-6)];
+% SNR_IN = -10:-1;
+SNR_IN = -10:-1;
+NRep = 40;
 
 % [SNR_LC] = test_RD_MR(modes_LC, IFs_LC, clwin, sigma_LC, Nfft, smooth_p, SNR_IN, NRep);
-[SNR_cos] = test_RD_MR(modes_cos, IFs_cos, clwin, sigma_cos, Nfft, smooth_p, SNR_IN, NRep);
+% save('snr_R1_LC.mat', 'SNR_LC');
+% [SNR_cos] = test_RD_MR(modes_cos, IFs_cos, clwin, sigma_cos, Nfft, smooth_p, SNR_IN, NRep);
+% save('snr_R1_cos.mat', 'SNR_cos');
 % [SNR_exp] = test_RD_MR(modes_exp, IFs_exp, clwin, sigma_exp, Nfft, smooth_p, SNR_IN, NRep);
+% save('snr_R1_exp.mat', 'SNR_exp');
 
-R1_plot_fig6_7(SNR_IN, SNR_cos);
+% % NaN at -9dB for cos
+% SNR_IN = -9;
+% [missing_cos] = test_RD_MR(modes_cos, IFs_cos, clwin, sigma_cos, Nfft, smooth_p, SNR_IN, NRep);
+% 
+% missing_cos.LCR.New
+% 
+% % NaN at -10dB for exp
+% SNR_IN = -10;
+% [missing_exp] = test_RD_MR(modes_exp, IFs_exp, clwin, sigma_exp, Nfft, smooth_p, SNR_IN, NRep);
+% 
+% missing_exp.LCR.New
+
+% return;
+% SNR_IN = -10;
+% smooth_p = [1 - 10^(-4)];
+% [SNR_exp2] = test_RD_MR(modes_exp, IFs_exp, clwin, sigma_exp, Nfft, smooth_p, SNR_IN, NRep);
+
+R1_plot_fig6_7(SNR_IN, SNR_LC, 'LC');
+R1_plot_fig6_7(SNR_IN, SNR_cos, 'cos');
+R1_plot_fig6_7(SNR_IN, SNR_exp, 'exp');

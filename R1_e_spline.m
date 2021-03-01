@@ -9,6 +9,7 @@ function [Modes_max, E_max] = R1_e_spline(E_Zones_TFR, id_Basins_TFR, id_Zones_T
 NB = length(E2_Basins);
 NZ = length(Energy_Zones);
 
+%% prepare TFR for mode energy computation
 E_spl_TFR = zeros(N_Y, L);
 for n=1:L
     EB_n = zeros(1, NB);
@@ -32,40 +33,43 @@ for n=1:L
     end
 end
 
-filter_TFR = (id_Zones_TFR > 0);
-idZF_R_TFR = idZ_RP_TFR.*filter_TFR;
-idZF_Z_TFR = id_Zones_TFR.*filter_TFR;
-EZF_TFR = E_Zones_TFR.*filter_TFR;
+% filter_TFR = (id_Zones_TFR > 0);
+% idZF_R_TFR = idZ_RP_TFR.*filter_TFR;
+% idZF_Z_TFR = id_Zones_TFR.*filter_TFR;
+% EZF_TFR = E_Zones_TFR.*filter_TFR;
 
 %% create weight matrices
 Norm_g3 = A_LM_g3;
-Norm_g3 = Norm_g3/max(max(Norm_g3));
+% Norm_g3 = Norm_g3/max(max(Norm_g3));
 
-Weight_NB_TFR = Norm_g3;
-Div_Basins = zeros(1, NB);
-for n=1:L
-    for k=1:N_Y
-        id_basin = id_Basins_TFR(k, n);
-        if id_basin > 0
-            if Norm_g3(k, n) > Div_Basins(id_basin)
-                Div_Basins(id_basin) = Norm_g3(k, n);
-            end
-        end
-    end
-end
-for n=1:L
-    for k=1:N_Y
-        id_basin = id_Basins_TFR(k, n);
-        if id_basin > 0 && Div_Basins(id_basin) > 0
-            Weight_NB_TFR(k, n) = Weight_NB_TFR(k, n)/Div_Basins(id_basin);
-        end
-    end
-end
+% Weight_NB_TFR = Norm_g3;
+% Div_Basins = zeros(1, NB);
+% for n=1:L
+%     for k=1:N_Y
+%         id_basin = id_Basins_TFR(k, n);
+%         if id_basin > 0
+%             if Norm_g3(k, n) > Div_Basins(id_basin)
+%                 Div_Basins(id_basin) = Norm_g3(k, n);
+%             end
+%         end
+%     end
+% end
+% for n=1:L
+%     for k=1:N_Y
+%         id_basin = id_Basins_TFR(k, n);
+%         if id_basin > 0 && Div_Basins(id_basin) > 0
+%             Weight_NB_TFR(k, n) = Weight_NB_TFR(k, n)/Div_Basins(id_basin);
+%         end
+%     end
+% end
 
 %% used TFR
-U_E_TFR = EZF_TFR;
-U_ID_TFR = idZF_Z_TFR;
-U_IDR_TFR = idZF_R_TFR;
+U_E_TFR = E_Zones_TFR;
+U_ID_TFR = id_Zones_TFR;
+U_IDR_TFR = idZ_RP_TFR;
+% idZF_R_TFR = idZ_RP_TFR.*filter_TFR;
+% idZF_Z_TFR = id_Zones_TFR.*filter_TFR;
+% EZF_TFR = E_Zones_TFR.*filter_TFR;
 
 %% new init
 
@@ -138,7 +142,7 @@ for n=(n_ord_vec')
         MZ_init = Mode_Zone_init(m_spl, :);
         MZ_other = sum(Mode_Zone_init(1:Nr ~= m_spl, :), 1);
         [pp, E_it(m_spl)] = R1_e1_spline_it(U_IDR_TFR, U_ID_TFR, id_Basins_TFR,...
-            Norm_g3, Weight_NB_TFR, E_spl_TFR, E2_Basins, MZ_init, MZ_other, smooth_p, Fs, Nfft);
+            Norm_g3, E_spl_TFR, E2_Basins, MZ_init, MZ_other, smooth_p, Fs, Nfft);
         M_it(m_spl).spline = pp;
     end
     

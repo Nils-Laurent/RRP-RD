@@ -3,6 +3,9 @@ function [modes, s_RM] = MR_simple(STFT, Fs, Nfft, g, Lg, K_lower, K_upper, Nr)
 [N_Y, L] = size(STFT);
 modes = zeros(Nr, L);
 
+gamma_Vg = median(abs(real(STFT(:))))/0.6745;
+STFT_TH = STFT.*(abs(STFT) > 2*gamma_Vg);
+
 KYd = max(K_lower, 1);
 KYu = min(K_upper, N_Y);
 for n=1:L
@@ -29,7 +32,7 @@ end
 
 for p=1:Nr
     for n=1:L
-        modes(p, n) = Fs/g(Lg+1)*sum(STFT(KYd(p, n):KYu(p, n), n))/Nfft;
+        modes(p, n) = Fs/g(Lg+1)*sum(STFT_TH(KYd(p, n):KYu(p, n), n))/Nfft;
     end
 end
 
