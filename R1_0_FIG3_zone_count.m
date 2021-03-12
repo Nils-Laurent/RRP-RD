@@ -28,56 +28,87 @@ k_max_LC = round((phip_s + std_s)*Nfft/L) + 1;
 
 %% cosine signal
 B = floor(2*L/(2*pi));
-phi_s = L/2*t+B/(2*pi)*cos(2*pi*t);
+A_cos = 2*pi;
+phi_s = L/2*t+B/A_cos*cos(A_cos*t);
 s_cos = exp(2*1i*pi*phi_s);
 sigma_cos = 0.0142;
 
-phip_s = L/2-B*sin(2*pi*t);
-phipp_s = -2*pi*cos(2*pi*t);
+phip_s = L/2-B*sin(A_cos*t);
+phipp_s = -B*A_cos*cos(A_cos*t);
 
 std_s = 1/(sqrt(2*pi)*sigma_cos)*sqrt(1 + sigma_cos^4*phipp_s.^2);
 k_min_cos = round((phip_s - std_s)*Nfft/L) + 1;
 k_max_cos = round((phip_s + std_s)*Nfft/L) + 1;
 
+
+%% HOsc
+A_osc = 8*pi;
+B = floor(2*L/(2*pi));
+phi_s = L/2*t+B/A_osc*cos(A_osc*t);
+s_osc = exp(2*1i*pi*phi_s);
+sigma_osc = 0.0142;
+
+phip_s = L/2-B*sin(A_osc*t);
+phipp_s = -B*A_osc*cos(A_osc*t);
+
+std_s = 1/(sqrt(2*pi)*sigma_osc)*sqrt(1 + sigma_osc^4*phipp_s.^2);
+k_min_osc = round((phip_s - std_s)*Nfft/L) + 1;
+k_max_osc = round((phip_s + std_s)*Nfft/L) + 1;
+
+
 %% Loops
 
 SNRs = -10:1:-2;
-% N_snr = length(SNRs);
+N_snr = length(SNRs);
 N_rep = 30;
 
-% y = 2;
-
 %% test max
-% SNR = -10;
-% noise = randn(L,1) + 1i*randn(L,1);
-% % load('noise_frag.mat');
-% s_noise = sigmerge(s_in, noise, SNR);
-% [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
-% [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, Nfft, g, Lh, sigma_s);
-% R1_TF_in_STD(STFT, QM, omega, tau, L, Nfft, y, k_IF_min, k_IF_max)
-% return;
 
-[N_hit_mean, N_hit_var] = R1_zone_count_rep(s_LC, L, Nfft, sigma_LC, SNRs, N_rep, k_min_LC, k_max_LC);
-[N_hit_mean_cos, N_hit_var_cos] = R1_zone_count_rep(s_cos, L, Nfft, sigma_cos, SNRs, N_rep, k_min_cos, k_max_cos);
+% [N_hit_mean, N_hit_var] = R1_zone_count_rep(s_LC, L, Nfft, sigma_LC, SNRs, N_rep, k_min_LC, k_max_LC);
+% [N_hit_mean_cos, N_hit_var_cos] = R1_zone_count_rep(s_cos, L, Nfft, sigma_cos, SNRs, N_rep, k_min_cos, k_max_cos);
+% [N_hit_mean_osc, N_hit_var_osc] = R1_zone_count_rep(s_osc, L, Nfft, sigma_osc, SNRs, N_rep, k_min_osc, k_max_osc);
+% 
+% save('data_fig3_zone_count.mat', 'N_hit_mean', 'N_hit_var',...
+%     'N_hit_mean_cos', 'N_hit_var_cos', 'N_hit_mean_osc', 'N_hit_var_osc');
+
+load('data_fig3_zone_count.mat');
 
 %% figures
+c1 = [0, 0, 0];
+c2 = [0.6350 0.0780 0.1840];
+c3 = [0.9290 0.6940 0.1250];
+
 figure;
 hold on;
-plot(SNRs, N_hit_mean(1, :)/L, '-', 'LineWidth', 2,...
+plot(SNRs, N_hit_mean(1, :)/L, 'k-', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c1,...
     'DisplayName', '$\mathcal{P}(2)$, linear chirp');
-plot(SNRs, N_hit_mean(2, :)/L, ':', 'LineWidth', 2,...
+plot(SNRs, N_hit_mean(2, :)/L, 'k-o', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c1,...
     'DisplayName', 'Max, linear chirp');
-plot(SNRs, N_hit_mean(3, :)/L, '--', 'LineWidth', 2,...
+plot(SNRs, N_hit_mean(3, :)/L, 'k-*', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c1,...
     'DisplayName', '$\mathcal{Q}(2)$, linear chirp');
-plot(SNRs, N_hit_mean_cos(1, :)/L, '-o', 'LineWidth', 2,...
-    'MarkerSize', 10,...
+
+plot(SNRs, N_hit_mean_cos(1, :)/L, 'r--', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c2,...
     'DisplayName', '$\mathcal{P}(2)$, cosine');
-plot(SNRs, N_hit_mean_cos(2, :)/L, ':o', 'LineWidth', 2,...
-    'MarkerSize', 10,...
+plot(SNRs, N_hit_mean_cos(2, :)/L, 'r--o', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c2,...
     'DisplayName', 'Max, cosine');
-plot(SNRs, N_hit_mean_cos(3, :)/L, '--o', 'LineWidth', 2,...
-    'MarkerSize', 10,...
+plot(SNRs, N_hit_mean_cos(3, :)/L, 'r--*', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c2,...
     'DisplayName', '$\mathcal{Q}(2)$, cosine');
+
+plot(SNRs, N_hit_mean_osc(1, :)/L, 'g-.', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c3,...
+    'DisplayName', '$\mathcal{P}(2)$, modulated cosine');
+plot(SNRs, N_hit_mean_osc(2, :)/L, 'g-.o', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c3,...
+    'DisplayName', 'Max, modulated cosine');
+plot(SNRs, N_hit_mean_osc(2, :)/L, 'g-.*', 'LineWidth', 2,...
+    'MarkerSize', 10, 'Color',c3,...
+    'DisplayName', '$\mathcal{Q}(2)$, modulated cosine');
 hold off;
 xlabel('SNRs', 'interpreter', 'latex');
 ylabel('Proportion of detection', 'interpreter', 'latex');
@@ -90,9 +121,9 @@ lgd = legend('Location', 'southeast');
 lgd.FontSize = 24;
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000]);
-savefig('fig_R1_prop_mean');
-saveas(gcf,'fig_R1_prop_mean','epsc');
-close all
+savefig('fig_R2_prop_mean');
+saveas(gcf,'fig_R2_prop_mean','epsc');
+% close all
 
 % figure;
 % hold on;
