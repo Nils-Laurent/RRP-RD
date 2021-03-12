@@ -1,5 +1,15 @@
 function [Modes_max, E_max] = R1_RRP_RD(STFT, QM, omega, tau, Fs, Nfft, Nr, sigma_s, smooth_p)
 
+% STFT : Short time fourier transform
+% QM : 2nd order modulation operator
+% omega : IF estimate
+% tau : groupe delay
+% Fs : Sampling frequency
+% Nfft : Number of frequency bins
+% Nr : Number of modes
+% sigma_s (unused) : gaussian coefficient
+% smooth_p : smoothing quantity to apply on the spline approximation
+
 [STFT_LM] = LM_from_STFT(STFT);
 
 gamma_Vg = median(abs(real(STFT(:))))/0.6745;
