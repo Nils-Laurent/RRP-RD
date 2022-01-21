@@ -5,15 +5,15 @@ function [pp_MZ, E_mode] =...
 [N_Y, L] = size(Norm_E_TFR);
 % NB = length(Energy_Basins);
 
-TFR_init = zeros(N_Y, L);
-for n=1:L
-    for k=1:N_Y
-        tf_id = ID_Zones_TFR(k, n);
-        if tf_id > 0 && MZ_init(tf_id) > 0
-            TFR_init(k, n) = Norm_E_TFR(k, n);
-        end
-    end
-end
+% TFR_init = zeros(N_Y, L);
+% for n=1:L
+%     for k=1:N_Y
+%         tf_id = ID_Zones_TFR(k, n);
+%         if tf_id > 0 && MZ_init(tf_id) > 0
+%             TFR_init(k, n) = Norm_E_TFR(k, n);
+%         end
+%     end
+% end
 
 % figure;
 % imagesc((0:L-1)/Fs, (0:N_Y-1)*Fs/Nfft, TFR_init);
