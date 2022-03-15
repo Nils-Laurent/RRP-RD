@@ -1,5 +1,8 @@
 close all;
 
+addpath('./RRP_alg/');
+addpath('./test/');
+
 %% signal definition
 L = 4096;
 t = (0:L-1)'/L;
@@ -19,7 +22,7 @@ poly_degree = 5;
 %% TFR LC
 % noise = randn(L,1)+1i*randn(L,1);
 % save noise_F1_zero noise
-load noise_F1_zero
+load('mat/noise_F1_zero');
 sn_LC = sigmerge(s_LC, noise, -10);
 [g, Lg] = create_gaussian_window(L, Nfft, sigma_LC);
 
@@ -77,5 +80,5 @@ hold off;
 pbaspect([1 1 1]);
 set(gcf, 'Position',  [0, 0, 1000, 1000])
 
-savefig('F1_R1_zeros_LC');
-saveas(gcf,'F1_R1_zeros_LC','epsc');
+savefig('fig_R1_zeros_LC');
+saveas(gcf,'fig_R1_zeros_LC','epsc');

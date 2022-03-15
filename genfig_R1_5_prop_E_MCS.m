@@ -1,5 +1,8 @@
 close all;
 
+addpath('./RRP_alg/');
+addpath('./test/');
+
 L = 4096;
 t = (0:L-1)'/L;
 
@@ -39,18 +42,6 @@ sigma_exp_LC = 0.0241;
 SNRs = -10:1:0;
 % N_snr = length(SNRs);
 N_rep = 10;
-
-% y = 2;
-
-%% test max
-% SNR = -10;
-% noise = randn(L,1) + 1i*randn(L,1);
-% % load('noise_frag.mat');
-% s_noise = sigmerge(s_in, noise, SNR);
-% [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
-% [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, Nfft, g, Lh, sigma_s);
-% R1_TF_in_STD(STFT, QM, omega, tau, L, Nfft, y, k_IF_min, k_IF_max)
-% return;
 
 P_max = 4;
 
@@ -145,50 +136,3 @@ savefig('fig_R1_prop_E_MCS_exp');
 saveas(gcf,'fig_R1_prop_E_MCS_exp','epsc');
 close all
 
-% figure;
-% hold on;
-% plot(SNRs, N_hit_mean_cos(1, :), 'LineWidth', 2,...
-%     'DisplayName', '$\mathcal{P}(\beta)$');
-% plot(SNRs, N_hit_mean_cos(2, :), 'g--o', 'LineWidth', 2,...
-%     'DisplayName', 'Max');
-% plot(SNRs, N_hit_mean_cos(3, :), 'r--', 'LineWidth', 2,...
-%     'DisplayName', 'Zone max');
-% hold off;
-% xlabel('SNRs', 'interpreter', 'latex');
-% ylabel('Proportion of detection', 'interpreter', 'latex');
-% xAX = get(gca,'XAxis');
-% set(xAX,'FontSize', 26);
-% yAX = get(gca,'YAxis');
-% set(yAX,'FontSize', 26);
-% set(groot, 'defaultLegendInterpreter', 'latex');
-% lgd = legend('Location', 'southeast');
-% lgd.FontSize = 24;
-% pbaspect([1 1 1]);
-% set(gcf, 'Position',  [0, 0, 1000, 1000]);
-% savefig('fig_R1_prop_mean_cos');
-% saveas(gcf,'fig_R1_prop_mean_cos','epsc');
-% close all
-
-% figure;
-% hold on;
-% plot(SNRs, N_hit_var(1, :), 'LineWidth', 2,...
-%     'DisplayName', '$\mathcal{P}(\beta)$');
-% plot(SNRs, N_hit_var(2, :), 'g--o', 'LineWidth', 2,...
-%     'DisplayName', 'Max');
-% plot(SNRs, N_hit_var(3, :), 'r--', 'LineWidth', 2,...
-%     'DisplayName', 'Zone max');
-% hold off;
-% xlabel('SNRs', 'interpreter', 'latex');
-% ylabel('std', 'interpreter', 'latex');
-% xAX = get(gca,'XAxis');
-% set(xAX,'FontSize', 26);
-% yAX = get(gca,'YAxis');
-% set(yAX,'FontSize', 26);
-% set(groot, 'defaultLegendInterpreter', 'latex');
-% lgd = legend('Location', 'southeast');
-% lgd.FontSize = 24;
-% pbaspect([1 1 1]);
-% set(gcf, 'Position',  [0, 0, 1000, 1000]);
-% savefig('fig_R1_prop_var');
-% saveas(gcf,'fig_R1_prop_var','epsc');
-% close all

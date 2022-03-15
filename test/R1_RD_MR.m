@@ -1,7 +1,5 @@
-function [SNR_out] = test_RD_MR(...
+function [SNR_out] = R1_RD_MR(...
     modes, IFs, clwin, sigma_s, Nfft, smooth_p, SNR_IN, NRep)
-
-addpath('./RRP_alg/');
 
 N_SNR = length(SNR_IN);
 N_sp = length(smooth_p);

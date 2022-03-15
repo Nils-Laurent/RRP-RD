@@ -1,8 +1,6 @@
 function [IF_FSST, m_FSST, FSST4, IF_new, m_simple, m_LCR, STFT_LCR, STFT] =...
     R1_GW_RRP(s_in, Fs, Nfft, sigma_L, sigma_Fs, smooth_p, N_Y)
 
-addpath('./RRP_alg/');
-
 L = length(s_in);
 Nr = 1;
 

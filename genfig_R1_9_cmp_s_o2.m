@@ -1,6 +1,7 @@
 close all;
 
 addpath('./RRP_alg/');
+addpath('./test/');
 
 %% global var
 L = 4096;
@@ -26,7 +27,7 @@ clwin = 10;
 Nfft = 512;
 % smooth_p = [1 - 10^(-2), 1 - 10^(-3), 1 - 10^(-4)];
 smooth_p = [1 - 10^(-4), 1 - 10^(-5), 1 - 10^(-6)];
-SNR_IN = -10:-1;
+SNR_IN = -10:1:-1;
 NRep = 40;
 % NRep = 1;
 
@@ -46,61 +47,60 @@ SNR_CR_Cl = zeros(Nr, N_SNR);
 SNR_IF_RRP = zeros(Nr, N_SNR, 3);
 SNR_CR_RRP = zeros(Nr, N_SNR, 3);
 
-% for n=1:N_SNR
-%     for k=1:NRep
-%         fprintf('snr %d/%d, rep %d/%d\n', n, length(SNR_IN), k, NRep);
-%         
-%         noise = randn(L, 1)+1i*randn(L, 1);
-%         s_noise = sigmerge(transpose(s_in), noise, SNR_IN(n));
-%         [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
-%         X_win = 2*Lh:(L-2*Lh);
-%         [STFT, omega, omega2, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_s);
-% 
-%         [Cs_simple] = exridge_mult(STFT, Nr, 0, 0, clwin);
-% 
-%         %% Classic SNR
-%         Cs_IF = zeros(size(Cs_simple));
-%         Cs_CR = zeros(size(Cs_simple));
-%         for m = 1:Nr
-%             ref_mode = modes(m, X_win);
-%             ref_IF = IFs(m, X_win);
-%             ref_CR = CRs(m, X_win);
-%             
-%             for n_2=X_win
-%                 Cs_IF(m, n_2) = real(omega2(Cs_simple(m, n_2), n_2));
-%                 Cs_CR(m, n_2) = real(QM(Cs_simple(m, n_2), n_2));
-%                 
-%             end
-% 
-%             x_Cl_IF = snr(ref_IF, Cs_IF(m, X_win) - ref_IF);
-%             SNR_IF_Cl(m, n) = SNR_IF_Cl(m, n) + x_Cl_IF/NRep;
-%             x_Cl_CR = snr(ref_CR, Cs_CR(m, X_win) - ref_CR);
-%             SNR_CR_Cl(m, n) = SNR_CR_Cl(m, n) + x_Cl_CR/NRep;
-%         end
-% 
-%         %% RRP
-%         for ns=1:N_sp
-%             [Spl, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_s, smooth_p(ns));
-%             
-%             for m = 1:Nr
-%                 ref_mode = modes(m, X_win);
-%                 ref_IF = IFs(m, X_win);
-%                 ref_CR = CRs(m, X_win);
-%                 
-%                 RRP_IF = fnval(Spl(m).spline, (0:L-1)/L);
-%                 RRP_CR = fnval(fnder(Spl(m).spline), (0:L-1)/L);
-%                 
-%                 x_RRP_IF = snr(ref_IF, RRP_IF(X_win) - ref_IF);
-%                 SNR_IF_RRP(m, n, ns) = SNR_IF_RRP(m, n, ns) + x_RRP_IF/NRep;
-%                 x_RRP_CR = snr(ref_CR, RRP_CR(X_win) - ref_CR);
-%                 SNR_CR_RRP(m, n, ns) = SNR_CR_RRP(m, n, ns) + x_RRP_CR/NRep;
-%             end
-%         end
-%     end
-% end
+for n=1:N_SNR
+    for k=1:NRep
+        fprintf('snr %d/%d, rep %d/%d\n', n, length(SNR_IN), k, NRep);
+
+        noise = randn(L, 1)+1i*randn(L, 1);
+        s_noise = sigmerge(transpose(s_in), noise, SNR_IN(n));
+        [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
+        X_win = 2*Lh:(L-2*Lh);
+        [STFT, omega, omega2, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_s);
+
+        [Cs_simple] = exridge_mult(STFT, Nr, 0, 0, clwin);
+
+        %% Classic SNR
+        Cs_IF = zeros(size(Cs_simple));
+        Cs_CR = zeros(size(Cs_simple));
+        for m = 1:Nr
+            ref_mode = modes(m, X_win);
+            ref_IF = IFs(m, X_win);
+            ref_CR = CRs(m, X_win);
+
+            for n_2=X_win
+                Cs_IF(m, n_2) = real(omega2(Cs_simple(m, n_2), n_2));
+                Cs_CR(m, n_2) = real(QM(Cs_simple(m, n_2), n_2));
+            end
+
+            x_Cl_IF = snr(ref_IF, Cs_IF(m, X_win) - ref_IF);
+            SNR_IF_Cl(m, n) = SNR_IF_Cl(m, n) + x_Cl_IF/NRep;
+            x_Cl_CR = snr(ref_CR, Cs_CR(m, X_win) - ref_CR);
+            SNR_CR_Cl(m, n) = SNR_CR_Cl(m, n) + x_Cl_CR/NRep;
+        end
+
+        %% RRP
+        for ns=1:N_sp
+            [Spl, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_s, smooth_p(ns));
+
+            for m = 1:Nr
+                ref_mode = modes(m, X_win);
+                ref_IF = IFs(m, X_win);
+                ref_CR = CRs(m, X_win);
+
+                RRP_IF = fnval(Spl(m).spline, (0:L-1)/L);
+                RRP_CR = fnval(fnder(Spl(m).spline), (0:L-1)/L);
+
+                x_RRP_IF = snr(ref_IF, RRP_IF(X_win) - ref_IF);
+                SNR_IF_RRP(m, n, ns) = SNR_IF_RRP(m, n, ns) + x_RRP_IF/NRep;
+                x_RRP_CR = snr(ref_CR, RRP_CR(X_win) - ref_CR);
+                SNR_CR_RRP(m, n, ns) = SNR_CR_RRP(m, n, ns) + x_RRP_CR/NRep;
+            end
+        end
+    end
+end
 % save("data_R22_cmp_s_o2.mat",...
 %     'SNR_IF_Cl', 'SNR_CR_Cl', 'SNR_IF_RRP', 'SNR_CR_RRP');
-load("data_R22_cmp_s_o2.mat");
+% load("data_R22_cmp_s_o2.mat");
 
 %% fig var
 B1 = [0 0.4470 0.7410];

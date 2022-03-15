@@ -1,6 +1,7 @@
 close all;
 
 addpath('./RRP_alg/');
+addpath('./test/');
 
 %% global var
 
@@ -56,7 +57,7 @@ Nr = 2;
 
 %% LC
 % noise = randn(L, 1)+1i*randn(L, 1);
-load('noise_R1_TFR_RD_LC.mat');
+load('mat/noise_R1_TFR_RD_LC.mat');
 s_noise = sigmerge(s_LC, noise, SNR_in);
 [g, Lh] = create_gaussian_window(L, Nfft, sigma_LC);
 [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_LC);
@@ -78,7 +79,7 @@ R1_plot_fig5(STFT, IF1, R1, IF2, R2, fname);
 
 %% cos
 % noise = randn(L, 1)+1i*randn(L, 1);
-load('noise_R1_TFR_RD_cos.mat');
+load('mat/noise_R1_TFR_RD_cos.mat');
 s_noise = sigmerge(s_cos, noise, SNR_in);
 [g, Lh] = create_gaussian_window(L, Nfft, sigma_cos);
 [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_cos);
@@ -100,7 +101,7 @@ R1_plot_fig5(STFT, IF1, R1, IF2, R2, fname);
 
 %% exp
 % noise = randn(L, 1)+1i*randn(L, 1);
-load('noise_R1_TFR_RD_exp.mat');
+load('mat/noise_R1_TFR_RD_exp.mat');
 s_noise = sigmerge(s_exp, noise, SNR_in);
 [g, Lh] = create_gaussian_window(L, Nfft, sigma_exp);
 [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_exp);

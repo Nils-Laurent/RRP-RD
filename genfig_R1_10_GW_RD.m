@@ -1,6 +1,9 @@
 close all;
 
-load GW-observed-Hanford.txt
+addpath('./RRP_alg/');
+addpath('./test/');
+
+load('app_sig/GW-observed-Hanford.txt')
 t1=GW_observed_Hanford(:,1);
 s1=GW_observed_Hanford(:,2);
 % figure;
@@ -13,7 +16,7 @@ s1=GW_observed_Hanford(:,2);
 t1 = t1(2:end);
 s1 = s1(2:end);
 
-load GW-waveform-H.txt
+load('app_sig/GW-waveform-H.txt')
 tw=GW_waveform_H(:,1);
 sw=GW_waveform_H(:,2)';
 

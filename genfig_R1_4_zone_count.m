@@ -1,5 +1,8 @@
 close all;
 
+addpath('./RRP_alg/');
+addpath('./test/');
+
 L = 4096;
 t = (0:L-1)'/L;
 
@@ -64,14 +67,14 @@ N_rep = 30;
 
 %% test max
 
-% [N_hit_mean, N_hit_var] = R1_zone_count_rep(s_LC, L, Nfft, sigma_LC, SNRs, N_rep, k_min_LC, k_max_LC);
-% [N_hit_mean_cos, N_hit_var_cos] = R1_zone_count_rep(s_cos, L, Nfft, sigma_cos, SNRs, N_rep, k_min_cos, k_max_cos);
-% [N_hit_mean_osc, N_hit_var_osc] = R1_zone_count_rep(s_osc, L, Nfft, sigma_osc, SNRs, N_rep, k_min_osc, k_max_osc);
-% 
+[N_hit_mean, N_hit_var] = R1_zone_count_rep(s_LC, L, Nfft, sigma_LC, SNRs, N_rep, k_min_LC, k_max_LC);
+[N_hit_mean_cos, N_hit_var_cos] = R1_zone_count_rep(s_cos, L, Nfft, sigma_cos, SNRs, N_rep, k_min_cos, k_max_cos);
+[N_hit_mean_osc, N_hit_var_osc] = R1_zone_count_rep(s_osc, L, Nfft, sigma_osc, SNRs, N_rep, k_min_osc, k_max_osc);
+
 % save('data_fig3_zone_count.mat', 'N_hit_mean', 'N_hit_var',...
 %     'N_hit_mean_cos', 'N_hit_var_cos', 'N_hit_mean_osc', 'N_hit_var_osc');
 
-load('data_fig3_zone_count.mat');
+% load('data_fig3_zone_count.mat');
 
 %% figures
 c1 = [0, 0, 0];

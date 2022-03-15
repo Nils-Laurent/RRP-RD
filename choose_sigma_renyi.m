@@ -1,10 +1,10 @@
 close all;
 
 %% signal definition
-load fig1-observed-Livingston.txt
-t = fig1_observed_Livingston(:,1);
+load('./app_sig/GW-observed-Hanford.txt')
+t = GW_observed_Hanford(:,1);
 t = t(:);
-s = fig1_observed_Livingston(:,2);
+s = GW_observed_Hanford(:,2);
 s = s(:);
 s = hilbert(s);
 L = length(s);
@@ -28,7 +28,7 @@ s_clean = s;
 sigma_set = 0.005:0.005:0.1;
 SL = length(sigma_set);
 
-[RE_vec] = sig_min(sigma_set, s_clean, L, Nfft);
+[RE_vec] = renyi(sigma_set, s_clean, L, Nfft);
 [~, arg] = min(RE_vec);
 fprintf('min at %u\n', arg);
 
@@ -41,7 +41,7 @@ a = max(1, arg - 1);
 b = min(length(sigma_set), arg + 1);
 sigma_set2 = sigma_set(a):0.001:sigma_set(b);
 
-[RE_vec] = sig_min(sigma_set2, s_clean, L, Nfft);
+[RE_vec] = renyi(sigma_set2, s_clean, L, Nfft);
 [~, arg] = min(RE_vec);
 fprintf('min at %u\n', arg);
 
@@ -54,7 +54,7 @@ a = max(1, arg - 1);
 b = min(length(sigma_set2), arg + 1);
 sigma_set3 = sigma_set2(a):0.0001:sigma_set2(b);
 
-[RE_vec] = sig_min(sigma_set3, s_clean, L, Nfft);
+[RE_vec] = renyi(sigma_set3, s_clean, L, Nfft);
 [~, arg] = min(RE_vec);
 fprintf('min at %u\n', arg);
 

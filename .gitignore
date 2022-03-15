@@ -2,7 +2,5 @@
 *.eps
 *.fig
 *.m~
-*.txt
 
-app_sig/
-LIGO_file/
+app_sig/other
