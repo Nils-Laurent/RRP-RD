@@ -1,5 +1,7 @@
 close all;
 
+addpath('./RRP_alg/');
+
 %% global var
 
 L = 4096;

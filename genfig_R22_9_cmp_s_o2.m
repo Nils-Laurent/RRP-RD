@@ -1,5 +1,7 @@
 close all;
 
+addpath('./RRP_alg/');
+
 %% global var
 L = 4096;
 t = (0:L-1)'/L;
