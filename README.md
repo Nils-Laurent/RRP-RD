@@ -5,11 +5,12 @@ RRP-RD is a Ridge Detector (RD) based on Relevant Ridge Portions (RRP) correspon
 
 ## Installation
 
-Clone this repository using option a or b:
- a. `git clone --recurse-submodules git@github.com:Nils-Laurent/RRP-RD.git`
- b. `git clone git@github.com:Nils-Laurent/RRP-RD.git`
-    and `git submodule init`
-    and `git submodule update`
+Clone this repository using one of the two options:
+- option 1: `git clone --recurse-submodules git@github.com:Nils-Laurent/RRP-RD.git`
+- option 2:
+  1. `git clone git@github.com:Nils-Laurent/RRP-RD.git`
+  1.  and `git submodule init`
+  1.  and `git submodule update`
 
 ## Project structure
 - `RRP_alg` contains the implementation of RRP-RD
