@@ -65,7 +65,7 @@ for n=1:length(SNR_IN)
         %% RRP
 %         fprintf('RRP RD\n');
         for ns=1:N_sp
-            [Spl, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_s, smooth_p(ns));
+            [Spl, ~] = RRP_RD(STFT, QM, omega, tau, smooth_p(ns), Nr);
             [m_SR_New, m_LCR_New, IF_New] = R1_MR_and_LCR_spl(STFT, Spl, g, Lh, sigma_s, Nr, Nfft, L);
             
             for m = 1:Nr

@@ -80,7 +80,7 @@ for n=1:N_SNR
 
         %% RRP
         for ns=1:N_sp
-            [Spl, ~] = R1_RRP_RD(STFT, QM, omega, tau, L, Nfft, Nr, sigma_s, smooth_p(ns));
+            [Spl, ~] = RRP_RD(STFT, QM, omega, tau, smooth_p(ns), Nr);
 
             for m = 1:Nr
                 ref_mode = modes(m, X_win);

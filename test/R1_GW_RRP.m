@@ -60,7 +60,8 @@ tau2 = tau(1:N_Y, :);
 % SNRs = zeros(Ns, 2);
 % IFs_vec = zeros(Ns, L);
 
-[Spl, ~] = R1_RRP_RD(STFT2, QM2, omega2, tau2, Fs, Nfft, Nr, sigma_s, smooth_p);
+[Spl, ~] = RRP_RD(STFT2, QM2, omega2, tau2, smooth_p, Nr,...
+    'samp', Fs, 'Nfft', Nfft);
 
 [m_simple, m_LCR, IF_new, STFT_LCR] = R1_MR_and_LCR_spl(STFT2, Spl, g, Lh, sigma_s, Nr, Nfft, Fs);
 % IFs_vec(ind, :) = IF_new(1, :);
