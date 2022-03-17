@@ -2,7 +2,7 @@ function [modes, TFR_denoised, Lg] = LCR(STFT, IFs, IMs, sigma_s, Fs, Nfft, cas)
 [N_Y, L] = size(STFT);
 [Nr, ~] = size(IFs);
 
-[g, Lg] = create_gaussian_window(L, Nfft, sigma_s);
+[g, Lg] = gauss_win(L, sigma_s);
 
 
 %% MR

@@ -11,7 +11,7 @@ for nn = 1:N_snr
     for nr = 1:N_rep
         noise = randn(L,1) + 1i*randn(L,1);
         s_noise = sigmerge(s_in, noise, SNRs(nn));
-        [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
+        [g, Lh] = gauss_win(L, sigma_s);
         [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_s);
         [c_nr] = R1_zone_count(STFT, QM, omega, tau, L, Nfft, y, k_IF_min, k_IF_max);
         

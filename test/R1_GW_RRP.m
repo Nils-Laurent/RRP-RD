@@ -29,7 +29,7 @@ lambda = 0;
 ft =1:L_pad/32;bt=1:L_pad;
 
 [STFT,FSST,FSST2,FSST3,FSST4,omega,omega2,omega3,tau2,tau3,phi22p,phi33p,phi44p] =...
-    sstn(s_pad,gamma,sigma_L,ft,bt);
+    sstn_test(s_pad,gamma,sigma_L,ft,bt);
 [Cs, Es] = exridge_mult_Noise(FSST4, Nr, lambda, clwin);
 IF_FSST = (Cs(1, :) - 1)*Fs/Nfft;
 d=10;
@@ -42,7 +42,7 @@ m_FSST = real(imf4);
 % Fs = L;
 sigma_s = sigma_Fs;
 
-[g, Lh] = create_gaussian_window(Fs, Nfft, sigma_s);
+[g, Lh] = gauss_win(Fs, sigma_s);
 % X_cmp = Lh+1:(L-Lh);
 [STFT, omega, ~, QM, ~, tau] = FM_operators(s_in, Fs, Nfft, g, Lh, sigma_s);
 

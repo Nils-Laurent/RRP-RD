@@ -1,7 +1,6 @@
 close all;
 
-addpath('./RRP_alg/');
-addpath('./test/');
+conf_genfig;
 
 %% global var
 L = 4096;

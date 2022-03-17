@@ -7,7 +7,7 @@ function [RE_vec] = renyi(sigma_set, s_clean, L, Nfft)
     for sigma = sigma_set
         iSL = iSL + 1;
         fprintf('%u/%u\n', iSL, SL);
-        [g, Lg] = create_gaussian_window(L, Nfft, sigma);
+        [g, Lg] = gauss_win(L, sigma);
         [TFR, ~, ~, ~] = FM_operators(s_clean, L, Nfft, g, Lg, sigma);
         Y = abs(TFR);
         TFR_MS = sum(Y(:));

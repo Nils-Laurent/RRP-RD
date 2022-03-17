@@ -14,7 +14,7 @@ s_clean = s;
 
 %% plot TFR
 % sig_plot = 0.0188;
-% [g, Lg] = create_gaussian_window(L, Nfft, sig_plot);
+% [g, Lg] = gauss_win(L, sig_plot);
 % [TFR, ~, ~, ~] = FM_operators(s_clean, Nfft, g, Lg, sig_plot);
 % 
 % figure;

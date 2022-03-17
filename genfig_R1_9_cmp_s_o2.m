@@ -1,7 +1,6 @@
 close all;
 
-addpath('./RRP_alg/');
-addpath('./test/');
+conf_genfig;
 
 %% global var
 L = 4096;
@@ -53,7 +52,7 @@ for n=1:N_SNR
 
         noise = randn(L, 1)+1i*randn(L, 1);
         s_noise = sigmerge(transpose(s_in), noise, SNR_IN(n));
-        [g, Lh] = create_gaussian_window(L, Nfft, sigma_s);
+        [g, Lh] = gauss_win(L, sigma_s);
         X_win = 2*Lh:(L-2*Lh);
         [STFT, omega, omega2, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_s);
 

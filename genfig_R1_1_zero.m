@@ -1,7 +1,6 @@
 close all;
 
-addpath('./RRP_alg/');
-addpath('./test/');
+conf_genfig;
 
 %% signal definition
 L = 4096;
@@ -24,7 +23,7 @@ poly_degree = 5;
 % save noise_F1_zero noise
 load('mat/noise_F1_zero');
 sn_LC = sigmerge(s_LC, noise, -10);
-[g, Lg] = create_gaussian_window(L, Nfft, sigma_LC);
+[g, Lg] = gauss_win(L, sigma_LC);
 
 [TFR, ~, ~, q] = FM_operators(sn_LC, L, Nfft, g, Lg, sigma_LC);
 

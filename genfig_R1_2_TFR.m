@@ -1,7 +1,6 @@
 close all;
 
-addpath('./RRP_alg/');
-addpath('./test/');
+conf_genfig;
 
 L = 4096;
 t = (0:L-1)'/L;
@@ -57,7 +56,7 @@ std_s = 1/(sqrt(2*pi)*sigma_osc)*sqrt(1 + sigma_osc^4*phipp_s.^2);
 k_min_osc = round((phip_s - std_s)*Nfft/L) + 1;
 k_max_osc = round((phip_s + std_s)*Nfft/L) + 1;
 %% fig STFT
-[g, Lh] = create_gaussian_window(L, Nfft, sigma_LC);
+[g, Lh] = gauss_win(L, sigma_LC);
 [STFT] = tfrstft(s_LC, Nfft, 1, g, Lh);
 
 figure;
@@ -80,7 +79,7 @@ saveas(gcf,'fig_R2_sigma_LC_stft','epsc');
 close all
 
 
-[g, Lh] = create_gaussian_window(L, Nfft, sigma_cos);
+[g, Lh] = gauss_win(L, sigma_cos);
 [STFT_cos] = tfrstft(s_cos, Nfft, 1, g, Lh);
 
 figure;
@@ -103,7 +102,7 @@ saveas(gcf,'fig_R2_sigma_cos_stft','epsc');
 close all
 
 
-[g, Lh] = create_gaussian_window(L, Nfft, sigma_osc);
+[g, Lh] = gauss_win(L, sigma_osc);
 [STFT_osc] = tfrstft(s_osc, Nfft, 1, g, Lh);
 
 figure;

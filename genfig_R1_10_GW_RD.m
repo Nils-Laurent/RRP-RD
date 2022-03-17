@@ -1,7 +1,6 @@
 close all;
 
-addpath('./RRP_alg/');
-addpath('./test/');
+conf_genfig;
 
 load('app_sig/GW-observed-Hanford.txt')
 t1=GW_observed_Hanford(:,1);
@@ -39,7 +38,7 @@ N_Y = 128;
 [IF_FSST, m_FSST, FSST4, IF_new, m_simple, m_LCR, STFT_LCR, STFT] =...
     R1_GW_RRP(s_noise, Fs, Nfft, sigma_L, sigma_Fs, smooth_p, N_Y);
 
-[~, Lh] = create_gaussian_window(Fs, Nfft, sigma_Fs);
+[~, Lh] = gauss_win(Fs, sigma_Fs);
 % X_cmp = (Lh+1):(L-round(Lh/2));
 % X_cmp = Lh:(L-round(Lh/4));
 X_cmp = 490:(L-round(Lh/4));
