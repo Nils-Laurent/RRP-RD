@@ -33,7 +33,9 @@ Nr = 1;
 SNR = inf;
 noise = randn(L,1) + 1i*randn(L,1);
 s_noise = sigmerge(s_in, noise, SNR);
-smooth_p = 1 - 10^(-10);
+% Original value in paper was : smooth_p = 1 - 10^(-10);
+% we change it since we do not take into account the sampling frequency
+smooth_p = 1 - 10^(-7);
 N_Y = 128;
 [IF_FSST, m_FSST, FSST4, IF_new, m_simple, m_LCR, STFT_LCR, STFT] =...
     R1_GW_RRP(s_noise, Fs, Nfft, sigma_L, sigma_Fs, smooth_p, N_Y);
@@ -92,7 +94,7 @@ hold on;
 plot(t_fig, IF_FSST(1, X_fig), 'r--',...
     'Linewidth', 2, 'DisplayName', 'FSST4');
 plot(t_fig, IF_new(1, X_fig), 'g',...
-    'Linewidth', 2, 'DisplayName', 'RRP-RD, $\lambda = 10^{-10}$');
+    'Linewidth', 2, 'DisplayName', 'RRP-RD, $\lambda = 10^{-7}$');
 hold off;
 lgd = legend('Location', 'northwest');
 lgd.FontSize = 24;
@@ -134,7 +136,7 @@ hold on;
 plot(t_fig, sw(X_fig), 'LineWidth', 2,...
     'DisplayName', 'Numerical relativity');
 plot(t_fig, m_LCR(X_fig), '-.', 'LineWidth', 2,...
-    'DisplayName', 'RRP-MR-LCR, $\lambda = 10^{-10}$');
+    'DisplayName', 'RRP-MR-LCR, $\lambda = 10^{-7}$');
 hold off;
 xlabel('time', 'interpreter', 'latex');
 ylabel('amplitude', 'interpreter', 'latex');

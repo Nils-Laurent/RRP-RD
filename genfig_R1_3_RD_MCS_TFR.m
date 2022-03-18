@@ -58,8 +58,12 @@ Nr = 2;
 % noise = randn(L, 1)+1i*randn(L, 1);
 load('mat/noise_R1_TFR_RD_LC.mat');
 s_noise = sigmerge(s_LC, noise, SNR_in);
-[g, Lh] = gauss_win(L, sigma_LC);
-[STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_LC);
+
+[STFT, TFR] = sst2(s_noise, sigma_LC, Nfft);
+QM = TFR.q_hat;
+omega = TFR.omega1_hat;
+tau = TFR.tau;
+
 [Spl_LC, ~] = RRP_RD(STFT, QM, omega, tau, smooth_p, Nr);
 
 Spl = Spl_LC;
@@ -80,8 +84,12 @@ R1_plot_fig5(STFT, IF1, R1, IF2, R2, fname);
 % noise = randn(L, 1)+1i*randn(L, 1);
 load('mat/noise_R1_TFR_RD_cos.mat');
 s_noise = sigmerge(s_cos, noise, SNR_in);
-[g, Lh] = gauss_win(L, sigma_cos);
-[STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_cos);
+
+[STFT, TFR] = sst2(s_noise, sigma_cos, Nfft);
+QM = TFR.q_hat;
+omega = TFR.omega1_hat;
+tau = TFR.tau;
+
 [Spl_cos, ~] = RRP_RD(STFT, QM, omega, tau, smooth_p, Nr);
 
 Spl = Spl_cos;
@@ -102,8 +110,12 @@ R1_plot_fig5(STFT, IF1, R1, IF2, R2, fname);
 % noise = randn(L, 1)+1i*randn(L, 1);
 load('mat/noise_R1_TFR_RD_exp.mat');
 s_noise = sigmerge(s_exp, noise, SNR_in);
-[g, Lh] = gauss_win(L, sigma_exp);
-[STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_exp);
+
+[STFT, TFR] = sst2(s_noise, sigma_exp, Nfft);
+QM = TFR.q_hat;
+omega = TFR.omega1_hat;
+tau = TFR.tau;
+
 [Spl_exp, ~] = RRP_RD(STFT, QM, omega, tau, smooth_p, Nr);
 
 Spl = Spl_exp;

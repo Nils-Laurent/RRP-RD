@@ -39,7 +39,7 @@ end
 % EZF_TFR = E_Zones_TFR.*filter_TFR;
 
 %% create weight matrices
-Norm_g3 = A_LM_g3;
+Norm_g3 = A_LM_g3/Fs;
 % Norm_g3 = Norm_g3/max(max(Norm_g3));
 
 % Weight_NB_TFR = Norm_g3;
@@ -149,13 +149,13 @@ for n=(n_ord_vec')
     %% figure
 %     E_it
 %     figure;
-%     imagesc((0:L-1)/L, (0:Nfft-1)*L/Nfft, E2_Basins_TFR);
+%     imagesc((0:L-1)/L, (0:N_Y-1)*L/Nfft, E2_Basins_TFR);
 %     set(gca,'ydir','normal');
 %     colormap(flipud(gray));
 %     axis square;
 %     title("spline weight");
 %     hold on;
-%     for m_spl=1:P
+%     for m_spl=1:Nr
 %         plot((0:L-1)/L, fnval(M_it(m_spl).spline, (0:L-1)/L));
 %     end
 %     hold off;

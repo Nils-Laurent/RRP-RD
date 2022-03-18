@@ -25,13 +25,14 @@ load('mat/noise_F1_zero');
 sn_LC = sigmerge(s_LC, noise, -10);
 [g, Lg] = gauss_win(L, sigma_LC);
 
-[TFR, ~, ~, q] = FM_operators(sn_LC, L, Nfft, g, Lg, sigma_LC);
+[STFT, TFR] = sst2(sn_LC, sigma_LC, Nfft);
+q = TFR.q_hat;
 
-S_LM = zeros(size(TFR));
+S_LM = zeros(size(STFT));
 
-A_TFR = abs(TFR);
+A_TFR = abs(STFT);
 
-LM_TFR = abs(TFR);
+LM_TFR = abs(STFT);
 for n=1:L
     for k=2:(Nfft-1)
         if A_TFR(k, n) > A_TFR(k - 1, n)...

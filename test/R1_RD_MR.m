@@ -22,7 +22,11 @@ for n=1:length(SNR_IN)
         s_noise = sigmerge(transpose(s_in), noise, SNR_IN(n));
         [g, Lh] = gauss_win(L, sigma_s);
         X_win = 2*Lh:(L-2*Lh);
-        [STFT, omega, ~, QM, ~, tau] = FM_operators(s_noise, L, Nfft, g, Lh, sigma_s);
+
+        [STFT, TFR] = sst2(s_noise, sigma_s, Nfft);
+        QM = TFR.q_hat;
+        omega = TFR.omega1_hat;
+        tau = TFR.tau;
 
 %         fprintf('Classic, ');
         [Cs_simple] = exridge_mult(STFT, Nr, 0, 0, clwin);

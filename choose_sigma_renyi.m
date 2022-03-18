@@ -15,7 +15,7 @@ s_clean = s;
 %% plot TFR
 % sig_plot = 0.0188;
 % [g, Lg] = gauss_win(L, sig_plot);
-% [TFR, ~, ~, ~] = FM_operators(s_clean, Nfft, g, Lg, sig_plot);
+% [TFR, ~] = stft(s_clean, Nfft, g)
 % 
 % figure;
 % imagesc((0:L-1)/L, (0:Nfft-1)*L/Nfft, abs(TFR));

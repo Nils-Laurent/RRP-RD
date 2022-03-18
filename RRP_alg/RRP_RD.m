@@ -8,8 +8,8 @@ function [R_out, E_out] = RRP_RD(STFT, Sc, omega, tau, P, varargin)
 %
 % INPUTS:
 %   STFT    : short time Fourier transform.
-%   Sc      : 2nd order modulation operator [2].
-%   omega   : IF estimate [2].
+%   Sc      : Chirp Rate (CR) estimate [2].
+%   omega   : First order Instantaneous Frequency (IF) estimate [2].
 %   tau     : groupe delay [2].
 %   P       : spline smoothing parameter,
 %             typicall value for a high level of noise is 1 - 1E-4,

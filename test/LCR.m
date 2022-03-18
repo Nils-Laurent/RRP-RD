@@ -11,10 +11,9 @@ modes = zeros(Nr, L);
 
 for p = 1:Nr
     %% use estimate and inverse STFT
-     [TFR_denoised_r] = LCR_estim_STFT(sigma_s, STFT, IFs(p, :), IMs(p, :), Nfft, Fs);
+    [TFR_denoised_r] = LCR_estim_STFT(sigma_s, STFT, IFs(p, :), IMs(p, :), Nfft, Fs);
     TFR_denoised = TFR_denoised + TFR_denoised_r;
-    % modes(p, :) = L*itfrstft(TFR_denoised_r, cas, g);
-    modes(p, :) = FM_inverse(TFR_denoised_r, Fs, Nfft, g, cas);
+    modes(p, :) = 1/g(Lg + 1)*sum(TFR_denoised_r, 1)/Nfft;
 end
 
 end

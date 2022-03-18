@@ -32,7 +32,7 @@ end
 
 for p=1:Nr
     for n=1:L
-        modes(p, n) = Fs/g(Lg+1)*sum(STFT_TH(KYd(p, n):KYu(p, n), n))/Nfft;
+        modes(p, n) = 1/g(Lg+1)*sum(STFT_TH(KYd(p, n):KYu(p, n), n))/Nfft;
     end
 end
 

@@ -38,13 +38,11 @@ m_FSST = real(imf4);
 % return;
 
 %% RRP
-% Fs1 = Fs;
-% Fs = L;
-sigma_s = sigma_Fs;
 
-[g, Lh] = gauss_win(Fs, sigma_s);
-% X_cmp = Lh+1:(L-Lh);
-[STFT, omega, ~, QM, ~, tau] = FM_operators(s_in, Fs, Nfft, g, Lh, sigma_s);
+[STFT, TFR] = sst2(s_in, sigma_L, Nfft);
+QM = TFR.q_hat;
+omega = TFR.omega1_hat;
+tau = TFR.tau;
 
 % N_Y = 128;
 STFT2 = STFT(1:N_Y, :);
@@ -52,20 +50,14 @@ QM2 = QM(1:N_Y, :);
 omega2 = omega(1:N_Y, :);
 tau2 = tau(1:N_Y, :);
 
-% smooth_vec = [1 - 10^(-3), 1 - 10^(-6), 1 - 10^(-10)];
-% smooth_p = 1 - 10^(-11);
-% smooth_p = smooth_p;
-% Ns = length(smooth_p);
+[Spl, ~] = RRP_RD(STFT2, QM2, omega2, tau2, smooth_p, Nr, 'Nfft', Nfft);
 
-% SNRs = zeros(Ns, 2);
-% IFs_vec = zeros(Ns, L);
+[g, Lh] = gauss_win(L, sigma_L);
+[m_simple, m_LCR, IF_new, STFT_LCR] =...
+    R1_MR_and_LCR_spl(STFT2, Spl, g, Lh, sigma_L, Nr, Nfft, L);
 
-[Spl, ~] = RRP_RD(STFT2, QM2, omega2, tau2, smooth_p, Nr,...
-    'samp', Fs, 'Nfft', Nfft);
-
-[m_simple, m_LCR, IF_new, STFT_LCR] = R1_MR_and_LCR_spl(STFT2, Spl, g, Lh, sigma_s, Nr, Nfft, Fs);
-% IFs_vec(ind, :) = IF_new(1, :);
 m_simple = real(m_simple);
 m_LCR = real(m_LCR);
+IF_new = Fs/L*IF_new;
 end
 
