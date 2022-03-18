@@ -56,8 +56,8 @@ std_s = 1/(sqrt(2*pi)*sigma_osc)*sqrt(1 + sigma_osc^4*phipp_s.^2);
 k_min_osc = round((phip_s - std_s)*Nfft/L) + 1;
 k_max_osc = round((phip_s + std_s)*Nfft/L) + 1;
 %% fig STFT
-[g, Lh] = gauss_win(L, sigma_LC);
-[STFT] = tfrstft(s_LC, Nfft, 1, g, Lh);
+[g, ~] = gauss_win(L, sigma_LC);
+[STFT, ~] = stft(s_LC, Nfft, g);
 
 figure;
 imagesc(t, fx, abs(STFT));
@@ -79,8 +79,8 @@ saveas(gcf,'fig_R2_sigma_LC_stft','epsc');
 close all
 
 
-[g, Lh] = gauss_win(L, sigma_cos);
-[STFT_cos] = tfrstft(s_cos, Nfft, 1, g, Lh);
+[g, ~] = gauss_win(L, sigma_cos);
+[STFT_cos, ~] = stft(s_cos, Nfft, g);
 
 figure;
 imagesc(t, fx, abs(STFT_cos));
@@ -102,8 +102,8 @@ saveas(gcf,'fig_R2_sigma_cos_stft','epsc');
 close all
 
 
-[g, Lh] = gauss_win(L, sigma_osc);
-[STFT_osc] = tfrstft(s_osc, Nfft, 1, g, Lh);
+[g, ~] = gauss_win(L, sigma_osc);
+[STFT_osc, ~] = stft(s_osc, Nfft, g);
 
 figure;
 imagesc(t, fx, abs(STFT_osc));

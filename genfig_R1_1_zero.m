@@ -22,7 +22,7 @@ poly_degree = 5;
 % noise = randn(L,1)+1i*randn(L,1);
 % save noise_F1_zero noise
 load('mat/noise_F1_zero');
-sn_LC = sigmerge(s_LC, noise, -10);
+sn_LC = add_noise(s_LC, noise, -10);
 [g, Lg] = gauss_win(L, sigma_LC);
 
 [STFT, TFR] = sst2(sn_LC, sigma_LC, Nfft);

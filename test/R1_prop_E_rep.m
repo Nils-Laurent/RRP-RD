@@ -9,7 +9,7 @@ for nn = 1:N_snr
     
     for nr = 1:N_rep
         noise = randn(L,1) + 1i*randn(L,1);
-        s_noise = sigmerge(s_in, noise, SNRs(nn));
+        s_noise = add_noise(s_in, noise, SNRs(nn));
 
         [STFT, TFR] = sst2(s_noise, sigma_s, Nfft);
         QM = TFR.q_hat;

@@ -19,7 +19,7 @@ for n=1:length(SNR_IN)
         fprintf('snr %d/%d, rep %d/%d\n', n, length(SNR_IN), k, NRep);
         
         noise = randn(L, 1)+1i*randn(L, 1);
-        s_noise = sigmerge(transpose(s_in), noise, SNR_IN(n));
+        s_noise = add_noise(transpose(s_in), noise, SNR_IN(n));
         [g, Lh] = gauss_win(L, sigma_s);
         X_win = 2*Lh:(L-2*Lh);
 

@@ -9,9 +9,9 @@ for nr = 1:N_rep
     noise = randn(L,1) + 1i*randn(L,1);
     for ns = 1:N_SNRs
         SNR = SNRs(ns);
-        s_noise = sigmerge(s_in, noise, SNR);
+        s_noise = add_noise(s_in, noise, SNR);
         [g, Lh] = gauss_win(L, sigma_s);
-        [STFT] = tfrstft(s_noise, Nfft, 1, g, Lh);
+        [STFT, ~] = stft(s_noise, Nfft, g);
         [STFT_LM] = LM_from_STFT(STFT);
         g_Vg = median(abs(real(STFT(:))))/0.6745;
         

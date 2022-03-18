@@ -54,7 +54,7 @@ for n=1:N_SNR
         fprintf("snr = %d, rep = %d\n", SNRs_IN(n), m);
         SNR = SNRs_IN(n);
         noise = randn(L,1) + 1i*randn(L,1);
-        s_noise = sigmerge(s_in, noise, SNR);
+        s_noise = add_noise(s_in, noise, SNR);
         [IF_FSST, m_FSST, FSST4, IF_new, m_simple, m_LCR, STFT_LCR, STFT] =...
             R1_GW_RRP(s_noise, Fs, Nfft, sigma_L, sigma_Fs, smooth_p, N_Y);
 

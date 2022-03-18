@@ -32,7 +32,7 @@ Nr = 1;
 
 SNR = inf;
 noise = randn(L,1) + 1i*randn(L,1);
-s_noise = sigmerge(s_in, noise, SNR);
+s_noise = add_noise(s_in, noise, SNR);
 % Original value in paper was : smooth_p = 1 - 10^(-10);
 % we change it since we do not take into account the sampling frequency
 smooth_p = 1 - 10^(-7);
