@@ -12,6 +12,9 @@ Clone this repository using one of the two options:
   1.  and `git submodule init`
   1.  and `git submodule update`
 
+## Usage
+A minimal example is provided in `minimal_example.m`
+
 ## Project structure
 - `RRP_alg` contains the implementation of RRP-RD
 - `test` contains necessary functions to run tests
