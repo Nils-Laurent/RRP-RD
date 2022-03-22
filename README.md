@@ -16,6 +16,7 @@ Clone this repository using one of the two options:
 A minimal example is provided in `minimal_example.m`
 
 ## Project structure
-- `RRP_alg` contains the implementation of RRP-RD
-- `test` contains necessary functions to run tests
-- genfig matlab files generate the same figures as in the paper
+- `RRP_alg/` contains the implementation of RRP-RD
+- `test/` contains necessary functions to run tests
+- `genfig_R1_*.m` matlab files generate the same figures as in the paper
+- `minimal_example.m` provides a minimal example
